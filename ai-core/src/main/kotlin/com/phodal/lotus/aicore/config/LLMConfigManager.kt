@@ -8,17 +8,29 @@ import java.io.File
 /**
  * Manages LLM configurations
  * Stores and retrieves configurations from local storage
+ * Uses singleton pattern to ensure single instance across the application
  */
-class LLMConfigManager(private val configDir: String = System.getProperty("user.home") + "/.lotus/ai") {
-    
+class LLMConfigManager(private val configDir: String = System.getProperty("user.home") + "/.lotus/ai") : ConfigProvider {
+
     private val _currentConfig = MutableStateFlow<LLMConfig?>(null)
-    val currentConfig: StateFlow<LLMConfig?> = _currentConfig.asStateFlow()
-    
+    override val currentConfig: StateFlow<LLMConfig?> = _currentConfig.asStateFlow()
+
     private val configFile = File(configDir, "llm_config.properties")
-    
+
     init {
         ensureConfigDirExists()
         loadConfig()
+    }
+
+    companion object {
+        @Volatile
+        private var instance: LLMConfigManager? = null
+
+        fun getInstance(): LLMConfigManager {
+            return instance ?: synchronized(this) {
+                instance ?: LLMConfigManager().also { instance = it }
+            }
+        }
     }
     
     private fun ensureConfigDirExists() {
@@ -97,6 +109,6 @@ class LLMConfigManager(private val configDir: String = System.getProperty("user.
     /**
      * Check if configuration is set
      */
-    fun isConfigured(): Boolean = _currentConfig.value != null
+    override fun isConfigured(): Boolean = _currentConfig.value != null
 }
 

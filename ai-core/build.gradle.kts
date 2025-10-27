@@ -7,11 +7,17 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
     // Koog framework for LLM integration
-    implementation("ai.koog:koog-agents:0.1.0")
+    implementation("ai.koog:koog-agents:0.5.1")
+
+    implementation("ai.koog:prompt-executor-deepseek-client:0.5.1")
+    implementation("ai.koog:prompt-executor-openai-client:0.5.1")
+    implementation("ai.koog:prompt-executor-anthropic-client:0.5.1")
+    implementation("ai.koog:prompt-executor-google-client:0.5.1")
 
     // Kotlin coroutines
     runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core")
