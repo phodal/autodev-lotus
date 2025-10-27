@@ -1,6 +1,7 @@
 package com.phodal.lotus.chat.history
 
 import com.phodal.lotus.chat.model.ChatMessage
+import com.phodal.lotus.aicore.summarization.ConversationSummarizer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,7 +12,8 @@ import java.util.*
  * Handles switching between conversations, creating new ones, and persisting them.
  */
 class ConversationManager(
-    private val historyService: ConversationHistoryService = ConversationHistoryService.getInstance()
+    private val historyService: ConversationHistoryService = ConversationHistoryService.getInstance(),
+    private val conversationSummarizer: ConversationSummarizer? = null
 ) {
     private val _currentConversationId = MutableStateFlow<String?>(null)
     val currentConversationId: StateFlow<String?> = _currentConversationId.asStateFlow()
@@ -139,6 +141,51 @@ class ConversationManager(
         historyService.clearAll()
         createNewConversation()
         refreshConversationList()
+    }
+
+    /**
+     * Summarize a conversation
+     *
+     * @param conversationId The ID of the conversation to summarize
+     * @return The summary text, or null if summarization is not available
+     */
+    suspend fun summarizeConversation(conversationId: String): String? {
+        if (conversationSummarizer == null || !conversationSummarizer.isReady()) {
+            return null
+        }
+
+        val conversation = historyService.getConversation(conversationId) ?: return null
+
+        if (conversation.messages.isEmpty()) {
+            return null
+        }
+
+        // Convert ChatMessage to ConversationMessage
+        val messages = conversation.messages.map { msg ->
+            com.phodal.lotus.aicore.summarization.ConversationMessage(
+                id = msg.id,
+                content = msg.content,
+                author = msg.author,
+                isUserMessage = msg.isMyMessage,
+                timestamp = msg.timestamp.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            )
+        }
+
+        // Generate summary
+        val result = conversationSummarizer.summarize(messages)
+
+        // Save summary to conversation
+        historyService.updateConversationSummary(conversationId, result.summary)
+
+        // Update current conversation if it's the one being summarized
+        if (_currentConversationId.value == conversationId) {
+            val updated = historyService.getConversation(conversationId)
+            if (updated != null) {
+                _currentConversation.value = updated
+            }
+        }
+
+        return result.summary
     }
 
     /**

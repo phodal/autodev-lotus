@@ -187,7 +187,7 @@ private fun ChatHeaderWithSearchBar(
     currentAIProvider: com.phodal.lotus.aicore.config.LLMProvider? = null,
     onShowHistoryDialog: () -> Unit = {},
     onNewConversation: () -> Unit = {},
-    currentConversationTitle: String = "New Conversation"
+    currentConversationTitle: String = "Current Conversation"
 ) {
     val showSearchBar = searchState.isSearching
 
@@ -234,7 +234,7 @@ private fun ChatHeaderWithSearchBar(
         // Right side: New conversation button
         IconButton(onClick = onNewConversation) {
             Icon(
-                ChatAppIcons.Header.plus, // TODO: Use proper plus icon
+                ChatAppIcons.Header.plus,
                 contentDescription = "New conversation"
             )
         }

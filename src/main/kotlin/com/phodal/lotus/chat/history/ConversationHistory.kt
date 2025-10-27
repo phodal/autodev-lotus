@@ -21,7 +21,12 @@ data class ConversationHistory(
     @Serializable(with = ChatMessageListSerializer::class)
     val messages: List<ChatMessage>,
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    /**
+     * AI-generated summary of the conversation (optional)
+     * Used to preserve context when archiving or referencing old conversations
+     */
+    val summary: String? = null
 ) {
     /**
      * Get a preview of the conversation (first user message or title)

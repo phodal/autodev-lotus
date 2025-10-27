@@ -73,7 +73,7 @@ class ConversationHistoryService(
      */
     fun updateConversation(id: String, messages: List<ChatMessage>): ConversationHistory? {
         var updatedHistory: ConversationHistory? = null
-        
+
         entityStore.executeInTransaction { txn ->
             val entity = txn.find(entityType, "id", id).firstOrNull()
             entity?.let {
@@ -81,12 +81,12 @@ class ConversationHistoryService(
                 if (jsonHistory != null) {
                     val existingHistory = Json.decodeFromString<ConversationHistory>(jsonHistory)
                     val now = Instant.now().toEpochMilli()
-                    
+
                     updatedHistory = existingHistory.copy(
                         messages = messages,
                         updatedAt = now
                     )
-                    
+
                     val newJsonHistory = Json.encodeToString(updatedHistory)
                     it.setBlobString("data", newJsonHistory)
                     it.setProperty("updatedAt", now)
@@ -94,7 +94,36 @@ class ConversationHistoryService(
                 }
             }
         }
-        
+
+        return updatedHistory
+    }
+
+    /**
+     * Update the summary of a conversation
+     */
+    fun updateConversationSummary(id: String, summary: String): ConversationHistory? {
+        var updatedHistory: ConversationHistory? = null
+
+        entityStore.executeInTransaction { txn ->
+            val entity = txn.find(entityType, "id", id).firstOrNull()
+            entity?.let {
+                val jsonHistory = it.getBlobString("data")
+                if (jsonHistory != null) {
+                    val existingHistory = Json.decodeFromString<ConversationHistory>(jsonHistory)
+                    val now = Instant.now().toEpochMilli()
+
+                    updatedHistory = existingHistory.copy(
+                        summary = summary,
+                        updatedAt = now
+                    )
+
+                    val newJsonHistory = Json.encodeToString(updatedHistory)
+                    it.setBlobString("data", newJsonHistory)
+                    it.setProperty("updatedAt", now)
+                }
+            }
+        }
+
         return updatedHistory
     }
     

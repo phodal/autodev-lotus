@@ -18,23 +18,15 @@ import com.phodal.lotus.aicore.config.LLMProvider
 object LangChain4jTokenCounter {
     /**
      * Create a token counter for the specified provider and model
+     * Uses jtokkit for accurate token counting
      */
     fun create(provider: LLMProvider, modelName: String): TokenCounter {
-        return when (provider) {
-            LLMProvider.OPENAI, LLMProvider.DEEPSEEK -> {
-                // DeepSeek uses OpenAI-compatible API
-                // For OpenAI models, we use a simple estimation
-                // TODO: Integrate with tiktoken or LangChain4j's token counter when available
-                SimpleTokenCounter(modelName)
-            }
-            LLMProvider.CLAUDE -> {
-                // Anthropic/Claude uses a different tokenization
-                SimpleTokenCounter(modelName)
-            }
-            LLMProvider.GEMINI -> {
-                // Google Gemini uses a different tokenization
-                SimpleTokenCounter(modelName)
-            }
+        return try {
+            // Try to use jtokkit for accurate token counting
+            JtokKitTokenCounter(modelName)
+        } catch (e: Exception) {
+            // Fallback to simple token counter if jtokkit fails
+            SimpleTokenCounter(modelName)
         }
     }
 }
