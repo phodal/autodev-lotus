@@ -12,7 +12,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.phodal.lotus.toolWindow.CodeLotusWindowFactory"
-                    icon="com.phodal.lotus.ComposeIcons.ComposeToolWindow"
+                    icon="com.phodal.lotus.ComposeIcons.Lotus"
                     id="CodeLotus"/>
         <postStartupActivity implementation="com.phodal.lotus.startup.MyProjectActivity" />
     </extensions>

@@ -12,7 +12,6 @@ object ChatAppIcons {
         val close = AllIconsKeys.Actions.Cancel
 
         val plus = AllIconsKeys.General.Add
-
         val history = AllIconsKeys.General.History
     }
 
