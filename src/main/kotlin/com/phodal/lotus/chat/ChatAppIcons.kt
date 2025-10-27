@@ -10,6 +10,10 @@ object ChatAppIcons {
     object Header {
         val search = AllIconsKeys.Actions.Find
         val close = AllIconsKeys.Actions.Cancel
+
+        val plus = AllIconsKeys.General.Add
+
+        val history = AllIconsKeys.General.History
     }
 
     object Prompt {

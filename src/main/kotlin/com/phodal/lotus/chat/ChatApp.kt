@@ -32,9 +32,12 @@ fun ChatApp(viewModel: ChatViewModel) {
     val messageInputState by viewModel.promptInputState.collectAsState(MessageInputState.Disabled)
     val isAIConfigured by viewModel.isAIConfigured.collectAsState(false)
     val currentAIProvider by viewModel.currentAIProvider.collectAsState(null)
+    val conversationHistories by viewModel.conversationHistories.collectAsState(emptyList())
+    val currentConversationTitle by viewModel.currentConversationTitle.collectAsState("New Conversation")
 
     val listState = rememberLazyListState()
     val textFieldState = rememberTextFieldState()
+    var showHistoryDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(chatMessages.lastOrNull()?.id) {
         if (chatMessages.isNotEmpty() && !searchState.isSearching) {
@@ -66,7 +69,10 @@ fun ChatApp(viewModel: ChatViewModel) {
             onPreviousResult = { viewModel.searchChatMessagesHandler().onNavigateToPreviousSearchResult() },
             onAIConfigSaved = { provider, apiKey, model -> viewModel.onAIConfigSaved(provider, apiKey, model) },
             isAIConfigured = isAIConfigured,
-            currentAIProvider = currentAIProvider
+            currentAIProvider = currentAIProvider,
+            onShowHistoryDialog = { showHistoryDialog = true },
+            onNewConversation = { viewModel.createNewConversation() },
+            currentConversationTitle = currentConversationTitle
         )
 
         // Token usage panel
@@ -96,6 +102,18 @@ fun ChatApp(viewModel: ChatViewModel) {
             onSend = { viewModel.onSendMessage() },
             onStop = { viewModel.onAbortSendingMessage() },
             isAIConfigured = isAIConfigured
+        )
+    }
+
+    // Conversation history dialog
+    if (showHistoryDialog) {
+        ConversationHistoryDialog(
+            conversations = conversationHistories,
+            currentConversationId = null, // TODO: Get current conversation ID from viewModel
+            onSelectConversation = { conversationId -> viewModel.switchToConversation(conversationId) },
+            onDeleteConversation = { conversationId -> viewModel.deleteConversation(conversationId) },
+            onRenameConversation = { conversationId, newTitle -> viewModel.updateConversationTitle(newTitle) },
+            onDismiss = { showHistoryDialog = false }
         )
     }
 }
@@ -166,7 +184,10 @@ private fun ChatHeaderWithSearchBar(
     onPreviousResult: () -> Unit,
     onAIConfigSaved: (com.phodal.lotus.aicore.config.LLMProvider, String, String) -> Unit = { _, _, _ -> },
     isAIConfigured: Boolean = false,
-    currentAIProvider: com.phodal.lotus.aicore.config.LLMProvider? = null
+    currentAIProvider: com.phodal.lotus.aicore.config.LLMProvider? = null,
+    onShowHistoryDialog: () -> Unit = {},
+    onNewConversation: () -> Unit = {},
+    currentConversationTitle: String = "New Conversation"
 ) {
     val showSearchBar = searchState.isSearching
 
@@ -178,7 +199,18 @@ private fun ChatHeaderWithSearchBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ChatHeaderTitle(modifier = Modifier.weight(1f))
+        // Left side: Search button
+        IconButton(onClick = { if (showSearchBar) onStopSearch() else onStartSearch() }) {
+            Icon(
+                ChatAppIcons.Header.search,
+                contentDescription = if (showSearchBar) "Close search" else "Search messages"
+            )
+        }
+
+        ChatHeaderTitle(
+            modifier = Modifier.weight(1f),
+            title = currentConversationTitle
+        )
 
         // Compact token usage display
         if (isAIConfigured) {
@@ -191,10 +223,19 @@ private fun ChatHeaderWithSearchBar(
             currentProvider = currentAIProvider
         )
 
-        IconButton(onClick = { if (showSearchBar) onStopSearch() else onStartSearch() }) {
+        // History button
+        IconButton(onClick = onShowHistoryDialog) {
             Icon(
-                ChatAppIcons.Header.search,
-                contentDescription = if (showSearchBar) "Close search" else "Search messages"
+                ChatAppIcons.Header.history,
+                contentDescription = "Show conversation history"
+            )
+        }
+
+        // Right side: New conversation button
+        IconButton(onClick = onNewConversation) {
+            Icon(
+                ChatAppIcons.Header.plus, // TODO: Use proper plus icon
+                contentDescription = "New conversation"
             )
         }
     }

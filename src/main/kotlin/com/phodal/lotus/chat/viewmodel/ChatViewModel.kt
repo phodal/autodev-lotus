@@ -9,6 +9,8 @@ import com.phodal.lotus.aicore.config.LLMProvider
 import com.phodal.lotus.aicore.config.LLMConfigManager
 import com.phodal.lotus.aicore.AIServiceFactory
 import com.phodal.lotus.chat.config.AIConfigService
+import com.phodal.lotus.chat.history.ConversationHistory
+import com.phodal.lotus.chat.history.ConversationManager
 
 interface ChatViewModelApi : Disposable {
     val chatMessagesFlow: StateFlow<List<ChatMessage>>
@@ -28,11 +30,22 @@ interface ChatViewModelApi : Disposable {
     val isAIConfigured: StateFlow<Boolean>
 
     val currentAIProvider: StateFlow<LLMProvider?>
+
+    // Conversation management
+    val conversationHistories: StateFlow<List<ConversationHistory>>
+    val currentConversationTitle: StateFlow<String>
+
+    fun createNewConversation(title: String = "New Conversation")
+    fun switchToConversation(conversationId: String)
+    fun saveCurrentConversation()
+    fun deleteConversation(conversationId: String)
+    fun updateConversationTitle(newTitle: String)
 }
 
 class ChatViewModel(
     private val coroutineScope: CoroutineScope,
-    private val repository: ChatRepositoryApi
+    private val repository: ChatRepositoryApi,
+    private val conversationManager: ConversationManager = ConversationManager.getInstance()
 ) : ChatViewModelApi {
 
     private val configService: AIConfigService = AIConfigService.getInstance()
@@ -49,6 +62,9 @@ class ChatViewModel(
 
     private val _currentAIProvider = MutableStateFlow<LLMProvider?>(null)
     override val currentAIProvider: StateFlow<LLMProvider?> = _currentAIProvider.asStateFlow()
+
+    override val conversationHistories: StateFlow<List<ConversationHistory>> = conversationManager.conversationHistories
+    override val currentConversationTitle: StateFlow<String> = conversationManager.currentConversationTitle
 
     private val searchChatMessagesHandler: SearchChatMessagesHandler = SearchChatMessagesHandlerImpl(
         coroutineScope = coroutineScope,
@@ -70,7 +86,11 @@ class ChatViewModel(
         // Emit all messages from the repository to the UI
         repository
             .messagesFlow
-            .onEach { messages -> _chatMessagesFlow.value = messages }
+            .onEach { messages ->
+                _chatMessagesFlow.value = messages
+                // Auto-save current conversation when messages change
+                conversationManager.saveCurrentConversation(messages)
+            }
             .launchIn(coroutineScope)
 
         // Monitor AI configuration status
@@ -82,6 +102,16 @@ class ChatViewModel(
                 AIServiceFactory.updateAIClient()
             }
             .launchIn(coroutineScope)
+
+        // Load the latest conversation on startup
+        val latestConversation = conversationManager.getAllConversations().firstOrNull()
+        if (latestConversation != null) {
+            conversationManager.switchToConversation(latestConversation.id)
+            _chatMessagesFlow.value = latestConversation.messages
+        } else {
+            // Create a new conversation if none exist
+            conversationManager.createNewConversation()
+        }
     }
 
     override fun onPromptInputChanged(input: String) {
@@ -164,7 +194,38 @@ class ChatViewModel(
         configService.saveConfig(config)
     }
 
+    override fun createNewConversation(title: String) {
+        conversationManager.createNewConversation(title)
+        _chatMessagesFlow.value = emptyList()
+    }
+
+    override fun switchToConversation(conversationId: String) {
+        conversationManager.switchToConversation(conversationId)
+        val conversation = conversationManager.currentConversation.value
+        if (conversation != null) {
+            _chatMessagesFlow.value = conversation.messages
+        }
+    }
+
+    override fun saveCurrentConversation() {
+        conversationManager.saveCurrentConversation(_chatMessagesFlow.value)
+    }
+
+    override fun deleteConversation(conversationId: String) {
+        conversationManager.deleteConversation(conversationId)
+        // Load the latest conversation after deletion
+        val latestConversation = conversationManager.getAllConversations().firstOrNull()
+        if (latestConversation != null) {
+            switchToConversation(latestConversation.id)
+        }
+    }
+
+    override fun updateConversationTitle(newTitle: String) {
+        conversationManager.updateCurrentConversationTitle(newTitle)
+    }
+
     override fun dispose() {
+        conversationManager.close()
         coroutineScope.cancel()
     }
 
