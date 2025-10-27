@@ -30,6 +30,8 @@ fun ChatApp(viewModel: ChatViewModel) {
     val chatMessages by viewModel.chatMessagesFlow.collectAsState(emptyList<ChatMessage>())
     val searchState by viewModel.searchChatMessagesHandler().searchStateFlow.collectAsState(SearchState.Idle)
     val messageInputState by viewModel.promptInputState.collectAsState(MessageInputState.Disabled)
+    val isAIConfigured by viewModel.isAIConfigured.collectAsState(false)
+    val currentAIProvider by viewModel.currentAIProvider.collectAsState(null)
 
     val listState = rememberLazyListState()
     val textFieldState = rememberTextFieldState()
@@ -64,7 +66,10 @@ fun ChatApp(viewModel: ChatViewModel) {
             onStopSearch = { viewModel.searchChatMessagesHandler().onStopSearch() },
             onSearchQueryChange = { query -> viewModel.searchChatMessagesHandler().onSearchQuery(query) },
             onNextResult = { viewModel.searchChatMessagesHandler().onNavigateToNextSearchResult() },
-            onPreviousResult = { viewModel.searchChatMessagesHandler().onNavigateToPreviousSearchResult() }
+            onPreviousResult = { viewModel.searchChatMessagesHandler().onNavigateToPreviousSearchResult() },
+            onAIConfigSaved = { provider, apiKey -> viewModel.onAIConfigSaved(provider, apiKey) },
+            isAIConfigured = isAIConfigured,
+            currentAIProvider = currentAIProvider
         )
 
         // Message area
@@ -82,10 +87,11 @@ fun ChatApp(viewModel: ChatViewModel) {
                 .fillMaxWidth()
                 .heightIn(max = 120.dp),
             textFieldState = textFieldState,
-            promptInputState = messageInputState,
+            promptInputState = if (isAIConfigured) messageInputState else MessageInputState.Disabled,
             onInputChanged = { viewModel.onPromptInputChanged(it) },
             onSend = { viewModel.onSendMessage() },
-            onStop = { viewModel.onAbortSendingMessage() }
+            onStop = { viewModel.onAbortSendingMessage() },
+            isAIConfigured = isAIConfigured
         )
     }
 }
@@ -153,7 +159,10 @@ private fun ChatHeaderWithSearchBar(
     onStopSearch: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onNextResult: () -> Unit,
-    onPreviousResult: () -> Unit
+    onPreviousResult: () -> Unit,
+    onAIConfigSaved: (com.phodal.lotus.aicore.config.LLMProvider, String) -> Unit = { _, _ -> },
+    isAIConfigured: Boolean = false,
+    currentAIProvider: com.phodal.lotus.aicore.config.LLMProvider? = null
 ) {
     val showSearchBar = searchState.isSearching
 
@@ -166,6 +175,12 @@ private fun ChatHeaderWithSearchBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         ChatHeaderTitle(modifier = Modifier.weight(1f))
+
+        AIConfigButton(
+            onConfigSaved = onAIConfigSaved,
+            isConfigured = isAIConfigured,
+            currentProvider = currentAIProvider
+        )
 
         IconButton(onClick = { if (showSearchBar) onStopSearch() else onStartSearch() }) {
             Icon(

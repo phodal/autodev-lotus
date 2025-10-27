@@ -53,7 +53,8 @@ fun PromptInput(
     hint: String = "Whats on your mind...",
     onInputChanged: (String) -> Unit = {},
     onSend: (String) -> Unit = {},
-    onStop: (String) -> Unit = {}
+    onStop: (String) -> Unit = {},
+    isAIConfigured: Boolean = false
 ) {
     val isSending = promptInputState.isSending
     var skipInputChangeUpdate by remember { mutableStateOf(false) }
@@ -93,7 +94,7 @@ fun PromptInput(
                         } else {
                             // Enter to send/update message
                             val message = textFieldState.text
-                            if (message.isNotBlank()) {
+                            if (message.isNotBlank() && isAIConfigured) {
                                 if (isSending) {
                                     onStop(message.toString())
                                 } else {
@@ -108,7 +109,8 @@ fun PromptInput(
                         false
                     }
                 },
-            placeholder = { Text(hint) },
+            placeholder = { Text(if (isAIConfigured) hint else "Please configure AI first...") },
+            enabled = isAIConfigured
         )
 
         Row(
@@ -127,7 +129,7 @@ fun PromptInput(
                 is MessageInputState.Sent -> {
                     DefaultButton(
                         modifier = Modifier.wrapContentSize(),
-                        enabled = promptInputState != MessageInputState.Disabled,
+                        enabled = promptInputState != MessageInputState.Disabled && isAIConfigured,
                         onClick = {
                             onSend(textFieldState.text.toString())
                             skipInputChangeUpdate = true
@@ -146,7 +148,7 @@ fun PromptInput(
                                     modifier = Modifier.size(JewelTheme.iconButtonStyle.metrics.minSize.height),
                                     key = ChatAppIcons.Prompt.send,
                                     contentDescription = "Send",
-                                    tint = if (promptInputState != MessageInputState.Disabled) ChatAppColors.Icon.enabledIconTint else ChatAppColors.Icon.disabledIconTint
+                                    tint = if (promptInputState != MessageInputState.Disabled && isAIConfigured) ChatAppColors.Icon.enabledIconTint else ChatAppColors.Icon.disabledIconTint
                                 )
                             }
                         }

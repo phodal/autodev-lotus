@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import com.phodal.lotus.chat.model.ChatMessage
+import com.phodal.lotus.aicore.AIServiceFactory
 import java.time.LocalDateTime
 
 /**
@@ -34,23 +35,7 @@ interface ChatRepositoryApi {
 class ChatRepository : ChatRepositoryApi {
 
     private val chatMessageFactory = ChatMessageFactory("AI Buddy", "Super Engineer")
-    private val aiResponseGenerator = AIResponseGenerator()
-    private val _messages = MutableStateFlow<List<ChatMessage>>(
-        listOf(
-            chatMessageFactory.createAIMessage(
-                content = "Hello! I'm your AI Buddy. I'm here to help and chat with you about anything you'd like to discuss. How are you doing today?",
-                timestamp = LocalDateTime.now().minusMinutes(30),
-            ),
-            chatMessageFactory.createAIMessage(
-                content = "Feel free to ask me questions, share your thoughts, or just have a casual conversation. I'm designed to provide helpful and engaging responses!",
-                timestamp = LocalDateTime.now().minusMinutes(25),
-            ),
-            chatMessageFactory.createAIMessage(
-                content = "I can help with a wide variety of topics - from coding and technical questions to creative writing, analysis, math problems, or just friendly chat. What interests you?",
-                timestamp = LocalDateTime.now().minusMinutes(20),
-            )
-        )
-    )
+    private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
 
     override val messagesFlow: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
@@ -79,16 +64,40 @@ class ChatRepository : ChatRepositoryApi {
 
     private suspend fun simulateAIResponse(userMessage: String) {
         val aiThinkingMessage = chatMessageFactory
-            .createAIThinkingMessage("Hm, let me think about that...")
+            .createAIThinkingMessage("Thinking...")
         _messages.value += aiThinkingMessage
 
-        // Simulate delay for the AI response
-        delay(2000 + (500..2000).random().toLong()) // Random delay between 2.5-4 seconds
+        try {
+            val aiClient = AIServiceFactory.getAIClient()
+            if (aiClient != null && aiClient.isConfigured()) {
+                // Use real AI service with streaming
+                try {
+                    val responseBuilder = StringBuilder()
 
-        val responseMessage =
-            chatMessageFactory.createAIMessage(content = aiResponseGenerator.generateAIResponse(userMessage))
+                    // Stream the response
+                    aiClient.streamMessage(userMessage) { chunk ->
+                        responseBuilder.append(chunk)
 
-        _messages.value = _messages.value
-            .map { message -> if (message.id == aiThinkingMessage.id) responseMessage else message }
+                        // Update the message in real-time as chunks arrive
+                        val responseMessage = chatMessageFactory.createAIMessage(content = responseBuilder.toString())
+                        _messages.value = _messages.value
+                            .map { message -> if (message.id == aiThinkingMessage.id) responseMessage else message }
+                    }
+                } catch (e: Exception) {
+                    // Error message if AI service fails
+                    val errorMessage = "Error: ${e.message}. Please check your AI configuration and try again."
+                    val responseMessage = chatMessageFactory.createAIMessage(content = errorMessage)
+                    _messages.value = _messages.value
+                        .map { message -> if (message.id == aiThinkingMessage.id) responseMessage else message }
+                }
+            } else {
+                // Should not happen as input should be disabled without AI config
+                throw IllegalStateException("AI is not configured. Please configure an AI provider first.")
+            }
+        } catch (e: Exception) {
+            // Remove thinking message on error
+            _messages.value = _messages.value.filter { !it.isAIThinkingMessage() }
+            throw e
+        }
     }
 }
