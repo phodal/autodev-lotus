@@ -1,15 +1,15 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.phodal.autodevlotus</id>
-    <name>autodev-lotus</name>
+    <id>com.phodal.lotus</id>
+    <name>CodeLotus</name>
     <vendor>phodal</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.LotusBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.phodal.autodevlotus.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.phodal.autodevlotus.startup.MyProjectActivity" />
+        <toolWindow factoryClass="com.phodal.lotus.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <postStartupActivity implementation="com.phodal.lotus.startup.MyProjectActivity" />
     </extensions>
 </idea-plugin>

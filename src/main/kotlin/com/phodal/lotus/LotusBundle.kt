@@ -1,13 +1,13 @@
-package com.github.phodal.autodevlotus
+package com.phodal.lotus
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
 @NonNls
-private const val BUNDLE = "messages.MyBundle"
+private const val BUNDLE = "messages.LotusBundle"
 
-object MyBundle : DynamicBundle(BUNDLE) {
+object LotusBundle : DynamicBundle(BUNDLE) {
 
     @JvmStatic
     fun message(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =

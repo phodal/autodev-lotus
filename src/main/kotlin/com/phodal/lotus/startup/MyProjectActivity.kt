@@ -1,4 +1,4 @@
-package com.github.phodal.autodevlotus.startup
+package com.phodal.lotus.startup
 
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
