@@ -15,12 +15,26 @@ data class ChatMessage(
     val author: String,
     val isMyMessage: Boolean = false,
     val timestamp: LocalDateTime = LocalDateTime.now(),
-    val type: ChatMessageType = TEXT
+    val type: ChatMessageType = TEXT,
+    val format: MessageFormat = MessageFormat.MARKDOWN,
+    val isStreaming: Boolean = false
 ) : Searchable {
 
     enum class ChatMessageType {
         AI_THINKING,
         TEXT;
+    }
+
+    /**
+     * Enum representing different content formats for rendering.
+     */
+    enum class MessageFormat {
+        /** Plain text or Markdown content */
+        MARKDOWN,
+        /** Mermaid diagram code */
+        MERMAID,
+        /** Unified diff format */
+        DIFF
     }
 
     @JvmOverloads

@@ -99,14 +99,35 @@ class ChatViewModel(
                 val currentUserMessage = getCurrentInputTextIfNotEmpty() ?: return@launch
                 emitPromptInputState(MessageInputState.Sending(""))
 
-                repository.sendMessage(currentUserMessage)
-
-                emitPromptInputState(
-                    when (val currentInputState = getCurrentInputTextIfNotEmpty()) {
-                        null -> MessageInputState.Disabled
-                        else -> MessageInputState.Enabled(currentInputState)
+                // Collect streaming events from repository
+                repository.sendMessage(currentUserMessage).collect { event ->
+                    when (event) {
+                        is com.phodal.lotus.chat.repository.ChatRepositoryApi.ChatStreamEvent.Started -> {
+                            // Stream started, keep sending state
+                        }
+                        is com.phodal.lotus.chat.repository.ChatRepositoryApi.ChatStreamEvent.Delta -> {
+                            // Delta received, could be used for progress indication
+                        }
+                        is com.phodal.lotus.chat.repository.ChatRepositoryApi.ChatStreamEvent.Completed -> {
+                            // Stream completed successfully
+                            emitPromptInputState(
+                                when (val currentInputState = getCurrentInputTextIfNotEmpty()) {
+                                    null -> MessageInputState.Disabled
+                                    else -> MessageInputState.Enabled(currentInputState)
+                                }
+                            )
+                        }
+                        is com.phodal.lotus.chat.repository.ChatRepositoryApi.ChatStreamEvent.Error -> {
+                            // Error occurred during streaming
+                            emitPromptInputState(
+                                MessageInputState.SendFailed(
+                                    event.throwable.message ?: "Stream failed",
+                                    event.throwable
+                                )
+                            )
+                        }
                     }
-                )
+                }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
 

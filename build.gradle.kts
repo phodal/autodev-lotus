@@ -47,11 +47,14 @@ dependencies {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
     }
 
+    testImplementation(kotlin("test"))
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
     testImplementation(libs.hamcrest)
     testImplementation(libs.composeuitest)
     testImplementation(libs.jewelstandalone)
+    testImplementation(libs.mockk)
+    testImplementation(libs.coroutinesTest)
     // Workaround for running tests on Windows and Linux
     // It provides necessary Skiko runtime native binaries
     testImplementation(libs.skikoAwtRuntimeAll)
@@ -161,6 +164,10 @@ kover {
 tasks {
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     publishPlugin {

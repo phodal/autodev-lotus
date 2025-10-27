@@ -20,14 +20,16 @@ class ChatMessageFactory(
      * while AI is processing the request.
      *
      * @param content The content of the message.
+     * @param id The unique identifier for the message. Defaults to a new UUID.
      * @param timestamp The timestamp of the message. Defaults to the current time.
      */
     fun createAIThinkingMessage(
         content: String,
+        id: String = java.util.UUID.randomUUID().toString(),
         timestamp: LocalDateTime = LocalDateTime.now(),
     ): ChatMessage {
         return ChatMessage(
-            id = AI_THINKING_MESSAGE_ID,
+            id = id,
             content = content,
             author = aiCompanionName,
             timestamp = timestamp,
@@ -40,13 +42,16 @@ class ChatMessageFactory(
      * Creates a new instance of `ChatMessage` representing an AI-generated message response.
      *
      * @param content The content of the message.
+     * @param id The unique identifier for the message. Defaults to a new UUID.
      * @param timestamp The timestamp of the message. Defaults to the current time.
      */
     fun createAIMessage(
         content: String,
+        id: String = java.util.UUID.randomUUID().toString(),
         timestamp: LocalDateTime = LocalDateTime.now(),
     ): ChatMessage {
         return ChatMessage(
+            id = id,
             content = content,
             author = aiCompanionName,
             timestamp = timestamp,
@@ -69,9 +74,5 @@ class ChatMessageFactory(
             isMyMessage = true,
             type = ChatMessage.ChatMessageType.TEXT
         )
-    }
-
-    companion object {
-        private const val AI_THINKING_MESSAGE_ID = "ai-thinking-message-id"
     }
 }

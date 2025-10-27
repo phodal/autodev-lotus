@@ -15,6 +15,7 @@ import org.jetbrains.jewel.foundation.theme.JewelTheme
 import org.jetbrains.jewel.ui.component.Text
 import com.phodal.lotus.chat.ChatAppColors
 import com.phodal.lotus.chat.model.ChatMessage
+import com.phodal.lotus.chat.ui.renderer.RendererRegistry
 import com.phodal.lotus.components.PulsingText
 
 @Composable
@@ -54,7 +55,13 @@ fun MessageBubble(
             AuthorName(message)
 
             if (message.isTextMessage()) {
-                MessageContent(message)
+                // Use pluggable renderer based on message format
+                RendererRegistry.renderMessage(message)
+
+                // Show streaming indicator if message is still being streamed
+                if (message.isStreaming) {
+                    PulsingText("▋", isLoading = true)
+                }
 
                 TimeStampLabel(message)
             } else if (message.isAIThinkingMessage()) {
