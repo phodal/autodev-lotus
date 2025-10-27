@@ -1,4 +1,4 @@
-package com.phodal.lotus.aicore.summarization
+package com.phodal.lotus.aicore.context.summarization
 
 import com.phodal.lotus.aicore.token.TokenCounter
 

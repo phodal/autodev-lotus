@@ -1,10 +1,12 @@
 package com.phodal.lotus.chat.history
 
+import com.phodal.lotus.aicore.context.summarization.ConversationMessage
 import com.phodal.lotus.chat.model.ChatMessage
-import com.phodal.lotus.aicore.summarization.ConversationSummarizer
+import com.phodal.lotus.aicore.context.summarization.ConversationSummarizer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.ZoneId
 import java.util.*
 
 /**
@@ -162,12 +164,12 @@ class ConversationManager(
 
         // Convert ChatMessage to ConversationMessage
         val messages = conversation.messages.map { msg ->
-            com.phodal.lotus.aicore.summarization.ConversationMessage(
+            ConversationMessage(
                 id = msg.id,
                 content = msg.content,
                 author = msg.author,
                 isUserMessage = msg.isMyMessage,
-                timestamp = msg.timestamp.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                timestamp = msg.timestamp.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             )
         }
 

@@ -1,5 +1,8 @@
 package com.phodal.lotus.aicore.summarization
 
+import com.phodal.lotus.aicore.context.summarization.ConversationMessage
+import com.phodal.lotus.aicore.context.summarization.DefaultContentSelectionStrategy
+import com.phodal.lotus.aicore.context.summarization.RecencyFocusedStrategy
 import com.phodal.lotus.aicore.token.FallbackTokenCounter
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*

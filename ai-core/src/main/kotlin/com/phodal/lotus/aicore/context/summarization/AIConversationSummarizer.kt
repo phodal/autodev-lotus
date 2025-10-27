@@ -1,8 +1,7 @@
-package com.phodal.lotus.aicore.summarization
+package com.phodal.lotus.aicore.context.summarization
 
 import com.phodal.lotus.aicore.client.AIClient
 import com.phodal.lotus.aicore.token.TokenCounter
-import com.phodal.lotus.aicore.token.TokenUsage
 
 /**
  * AI-powered conversation summarizer
