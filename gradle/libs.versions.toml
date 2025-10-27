@@ -15,6 +15,8 @@ hamcrest = "2.2"
 composeuitest = "1.8.0-alpha04"
 jewelstandalone = "0.31.0-252.27409"
 skikoAwtRuntimeAll = "0.9.22"
+mockk = "1.13.13"
+coroutinesTest = "1.10.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -23,6 +25,8 @@ hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest"
 composeuitest = { group = "org.jetbrains.compose.ui", name = "ui-test-junit4-desktop", version.ref = "composeuitest" }
 jewelstandalone = { group = "org.jetbrains.jewel", name = "jewel-int-ui-standalone", version.ref = "jewelstandalone" }
 skikoAwtRuntimeAll = { group = "org.jetbrains.skiko", name = "skiko-awt-runtime-all", version.ref = "skikoAwtRuntimeAll" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
