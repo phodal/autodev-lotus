@@ -18,6 +18,10 @@ skikoAwtRuntimeAll = "0.9.22"
 mockk = "1.13.13"
 coroutinesTest = "1.10.1"
 
+# MCP and Ktor
+mcp = "0.7.4"
+ktor = "3.3.1"
+
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
@@ -26,6 +30,11 @@ composeuitest = { group = "org.jetbrains.compose.ui", name = "ui-test-junit4-des
 jewelstandalone = { group = "org.jetbrains.jewel", name = "jewel-int-ui-standalone", version.ref = "jewelstandalone" }
 skikoAwtRuntimeAll = { group = "org.jetbrains.skiko", name = "skiko-awt-runtime-all", version.ref = "skikoAwtRuntimeAll" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+
+# MCP and Ktor
+mcp = { group = "io.modelcontextprotocol", name = "kotlin-sdk", version.ref = "mcp" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
+ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty", version.ref = "ktor" }
 coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
 [plugins]

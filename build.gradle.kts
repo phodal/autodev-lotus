@@ -56,6 +56,11 @@ dependencies {
     // Kotlinx serialization for JSON
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
+    // MCP Kotlin SDK for Model Context Protocol
+    implementation(libs.mcp)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.server.netty)
+
     testImplementation(kotlin("test"))
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
