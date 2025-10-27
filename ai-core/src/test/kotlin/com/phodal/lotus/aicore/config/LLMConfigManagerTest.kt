@@ -185,8 +185,8 @@ class LLMConfigManagerTest {
 
         // Test Claude models
         val claudeModels = LLMConfig.getAvailableModels(LLMProvider.CLAUDE)
-        assertTrue(claudeModels.contains("claude-3-5-sonnet-20241022"))
-        assertTrue(claudeModels.contains("claude-3-opus-20240229"))
+        assertTrue(claudeModels.contains("claude-4.5-sonnet-latest"))
+        assertTrue(claudeModels.contains("claude-3-opus-latest"))
         assertTrue(claudeModels.isNotEmpty())
 
         // Test Gemini models
@@ -200,9 +200,9 @@ class LLMConfigManagerTest {
     fun testGetDefaultModels() {
         // Test default models for each provider
         assertEquals("deepseek-chat", LLMConfig.getDefaultModel(LLMProvider.DEEPSEEK))
-        assertEquals("gpt-4o", LLMConfig.getDefaultModel(LLMProvider.OPENAI))
-        assertEquals("claude-3-5-sonnet-latest", LLMConfig.getDefaultModel(LLMProvider.CLAUDE))
-        assertEquals("gemini-2.0-flash", LLMConfig.getDefaultModel(LLMProvider.GEMINI))
+        assertEquals("gpt-5", LLMConfig.getDefaultModel(LLMProvider.OPENAI))
+        assertEquals("claude-4.5-sonnet-latest", LLMConfig.getDefaultModel(LLMProvider.CLAUDE))
+        assertEquals("gemini-2.5-pro", LLMConfig.getDefaultModel(LLMProvider.GEMINI))
     }
 
     @Test

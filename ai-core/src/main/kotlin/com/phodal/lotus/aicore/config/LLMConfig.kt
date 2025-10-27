@@ -39,6 +39,7 @@ data class LLMConfig(
                 "gpt-4-turbo"
             )
             LLMProvider.CLAUDE -> listOf(
+                "claude-4.5-sonnet-latest",
                 // Use Anthropic "-latest" aliases where available to track current releases
                 "claude-3.7-sonnet-latest",
                 "claude-3.5-sonnet-latest",
@@ -46,6 +47,7 @@ data class LLMConfig(
                 "claude-3-haiku-latest"
             )
             LLMProvider.GEMINI -> listOf(
+                "gemini-2.5-pro",
                 "gemini-2.0-pro",
                 "gemini-2.0-flash",
                 "gemini-1.5-pro",
@@ -59,9 +61,9 @@ data class LLMConfig(
         fun getDefaultModel(provider: LLMProvider): String = when (provider) {
             LLMProvider.DEEPSEEK -> "deepseek-chat"
             LLMProvider.OPENAI -> "gpt-5"
-            // Prefer the alias to follow the latest Sonnet 3.7 drop automatically
-            LLMProvider.CLAUDE -> "claude-3.7-sonnet-latest"
-            LLMProvider.GEMINI -> "gemini-2.0-pro"
+            // Prefer the alias to follow the latest Sonnet 4.5 drop automatically
+            LLMProvider.CLAUDE -> "claude-4.5-sonnet-latest"
+            LLMProvider.GEMINI -> "gemini-2.5-pro"
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.phodal.lotus.aicore
 
 import com.phodal.lotus.aicore.client.AIClient
-import com.phodal.lotus.aicore.client.KoogAIClient
+import com.phodal.lotus.aicore.client.LangChain4jAIClient
 import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.aicore.config.ConfigProvider
 
@@ -33,7 +33,7 @@ object AIServiceFactory {
      * Create a new AI client with the given configuration
      */
     fun createAIClient(config: LLMConfig): AIClient {
-        val client = KoogAIClient(config)
+        val client = LangChain4jAIClient(config)
         aiClient = client
         return client
     }
@@ -44,7 +44,7 @@ object AIServiceFactory {
     fun updateAIClient() {
         val config = configProvider?.currentConfig?.value
         if (config != null) {
-            aiClient = KoogAIClient(config)
+            aiClient = LangChain4jAIClient(config)
         }
     }
 

@@ -11,16 +11,14 @@ repositories {
 }
 
 dependencies {
-    // Koog framework for LLM integration
-    implementation("ai.koog:koog-agents:0.5.1")
-
-    implementation("ai.koog:prompt-executor-deepseek-client:0.5.1")
-    implementation("ai.koog:prompt-executor-openai-client:0.5.1")
-    implementation("ai.koog:prompt-executor-anthropic-client:0.5.1")
-    implementation("ai.koog:prompt-executor-google-client:0.5.1")
+    // LangChain4j for LLM integration
+    implementation("dev.langchain4j:langchain4j:1.7.1")
+    implementation("dev.langchain4j:langchain4j-open-ai:1.7.1")
+    implementation("dev.langchain4j:langchain4j-anthropic:1.7.1")
+    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.7.1")
 
     // Kotlin coroutines
-    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
 
     // Testing
     testImplementation(kotlin("test"))

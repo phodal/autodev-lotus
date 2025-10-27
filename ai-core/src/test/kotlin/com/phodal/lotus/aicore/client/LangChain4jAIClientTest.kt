@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 
-class KoogAIClientTest {
+class LangChain4jAIClientTest {
 
-    private lateinit var client: KoogAIClient
+    private lateinit var client: LangChain4jAIClient
 
     @BeforeEach
     fun setUp() {
@@ -18,7 +18,7 @@ class KoogAIClientTest {
             apiKey = "test-api-key",
             model = "deepseek-chat"
         )
-        client = KoogAIClient(config)
+        client = LangChain4jAIClient(config)
     }
 
     @Test
@@ -31,9 +31,9 @@ class KoogAIClientTest {
         val config = LLMConfig(
             provider = LLMProvider.OPENAI,
             apiKey = "",
-            model = "gpt-4"
+            model = "gpt-4o"
         )
-        val unconfiguredClient = KoogAIClient(config)
+        val unconfiguredClient = LangChain4jAIClient(config)
         assertFalse(unconfiguredClient.isConfigured())
     }
 
@@ -52,7 +52,7 @@ class KoogAIClientTest {
                 apiKey = "test-key-$provider",
                 model = LLMConfig.getDefaultModel(provider)
             )
-            val testClient = KoogAIClient(config)
+            val testClient = LangChain4jAIClient(config)
             assertTrue(testClient.isConfigured())
         }
     }
@@ -60,9 +60,9 @@ class KoogAIClientTest {
     @Test
     fun testDefaultModels() {
         assertEquals("deepseek-chat", LLMConfig.getDefaultModel(LLMProvider.DEEPSEEK))
-        assertEquals("gpt-4o", LLMConfig.getDefaultModel(LLMProvider.OPENAI))
-        assertEquals("claude-3-5-sonnet-latest", LLMConfig.getDefaultModel(LLMProvider.CLAUDE))
-        assertEquals("gemini-2.0-flash", LLMConfig.getDefaultModel(LLMProvider.GEMINI))
+        assertEquals("gpt-5", LLMConfig.getDefaultModel(LLMProvider.OPENAI))
+        assertEquals("claude-4.5-sonnet-latest", LLMConfig.getDefaultModel(LLMProvider.CLAUDE))
+        assertEquals("gemini-2.5-pro", LLMConfig.getDefaultModel(LLMProvider.GEMINI))
     }
 }
 
