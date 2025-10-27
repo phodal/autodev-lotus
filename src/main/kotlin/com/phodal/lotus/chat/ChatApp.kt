@@ -69,6 +69,13 @@ fun ChatApp(viewModel: ChatViewModel) {
             currentAIProvider = currentAIProvider
         )
 
+        // Token usage panel
+        if (isAIConfigured) {
+            TokenUsagePanel(
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         // Message area
         ChatList(
             modifier = Modifier
@@ -172,6 +179,11 @@ private fun ChatHeaderWithSearchBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         ChatHeaderTitle(modifier = Modifier.weight(1f))
+
+        // Compact token usage display
+        if (isAIConfigured) {
+            CompactTokenUsageDisplay()
+        }
 
         AIConfigButton(
             onConfigSaved = onAIConfigSaved,

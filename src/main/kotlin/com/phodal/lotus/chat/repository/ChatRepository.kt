@@ -146,8 +146,8 @@ class ChatRepository : ChatRepositoryApi {
                     var lastUpdateTime = System.currentTimeMillis()
                     val updateIntervalMs = 50L // Update UI at most every 50ms to avoid excessive updates
 
-                    // Stream the response
-                    aiClient.streamMessage(userMessage) { chunk ->
+                    // Stream the response (now returns TokenUsage)
+                    val tokenUsage = aiClient.streamMessage(userMessage) { chunk ->
                         // Check if coroutine is still active
                         if (!kotlinx.coroutines.runBlocking { currentCoroutineContext().isActive }) {
                             return@streamMessage
@@ -197,7 +197,7 @@ class ChatRepository : ChatRepositoryApi {
                         }
                     }
 
-                    // Emit Completed event
+                    // Emit Completed event (token usage is now tracked automatically in AIClient)
                     emit(ChatRepositoryApi.ChatStreamEvent.Completed(aiMessageId, finalContent))
                 } catch (e: Exception) {
                     // Error message if AI service fails

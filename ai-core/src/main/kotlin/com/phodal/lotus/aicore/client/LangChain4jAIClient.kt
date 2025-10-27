@@ -12,6 +12,9 @@ import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel
 import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel
 import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.aicore.config.LLMProvider
+import com.phodal.lotus.aicore.token.TokenUsage
+import com.phodal.lotus.aicore.token.LangChain4jTokenCounter
+import com.phodal.lotus.aicore.token.TokenUsageTracker
 import java.time.Duration
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -24,10 +27,15 @@ import kotlin.coroutines.resumeWithException
  * This implementation uses the LangChain4j framework's ChatModel API to make real API calls
  * to various LLM providers.
  */
-class LangChain4jAIClient(private val config: LLMConfig) : AIClient {
+class LangChain4jAIClient(
+    private val config: LLMConfig,
+    private val conversationId: String? = null
+) : AIClient {
 
     private val chatModel: ChatModel = createChatModel()
     private val streamingChatModel: StreamingChatModel = createStreamingChatModel()
+    private val tokenCounter = LangChain4jTokenCounter.create(config.provider, config.model)
+    private val tokenUsageTracker = TokenUsageTracker.getInstance()
 
     private fun createChatModel(): ChatModel {
         return when (config.provider) {
@@ -117,27 +125,63 @@ class LangChain4jAIClient(private val config: LLMConfig) : AIClient {
         }
     }
 
-    override suspend fun sendMessage(message: String): String {
+    override suspend fun sendMessage(message: String): AIMessageResult {
         return try {
-            chatModel.chat(message)
+            // For non-streaming calls, we estimate tokens
+            // LangChain4j's chat() method doesn't return ChatResponse with token usage
+            val inputTokens = tokenCounter.estimateTokenCount(message)
+            val response = chatModel.chat(message)
+            val outputTokens = tokenCounter.estimateTokenCount(response)
+
+            val tokenUsage = TokenUsage.of(
+                inputTokens = inputTokens,
+                outputTokens = outputTokens,
+                modelName = config.model,
+                conversationId = conversationId
+            )
+
+            // Record token usage
+            tokenUsageTracker.recordUsage(tokenUsage)
+
+            AIMessageResult(content = response, tokenUsage = tokenUsage)
         } catch (e: Exception) {
             throw RuntimeException("Failed to get response from ${config.provider}: ${e.message}", e)
         }
     }
 
-    override suspend fun streamMessage(message: String, onChunk: (String) -> Unit) {
+    override suspend fun streamMessage(message: String, onChunk: (String) -> Unit): TokenUsage? {
         return suspendCancellableCoroutine { continuation ->
             try {
+                val inputTokens = tokenCounter.estimateTokenCount(message)
+                val responseBuilder = StringBuilder()
+
                 streamingChatModel.chat(
                     message,
                     object : StreamingChatResponseHandler {
                         override fun onPartialResponse(partialResponse: String) {
+                            responseBuilder.append(partialResponse)
                             onChunk(partialResponse)
                         }
 
                         override fun onCompleteResponse(completeResponse: ChatResponse) {
+                            // Calculate token usage
+                            val fullResponse = responseBuilder.toString()
+                            val outputTokens = tokenCounter.estimateTokenCount(fullResponse)
+
+                            val tokenUsage = TokenUsage.of(
+                                inputTokens = inputTokens,
+                                outputTokens = outputTokens,
+                                modelName = config.model,
+                                conversationId = conversationId
+                            )
+
+                            // Record token usage asynchronously
+                            kotlinx.coroutines.runBlocking {
+                                tokenUsageTracker.recordUsage(tokenUsage)
+                            }
+
                             // Stream completed successfully
-                            continuation.resume(Unit)
+                            continuation.resume(tokenUsage)
                         }
 
                         override fun onError(error: Throwable) {
