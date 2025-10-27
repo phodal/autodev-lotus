@@ -3,3 +3,5 @@ plugins {
 }
 
 rootProject.name = "autodev-lotus"
+
+include("ai-core")

@@ -42,6 +42,9 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
+    // AI Core module
+    implementation(project(":ai-core"))
+
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
     testImplementation(libs.hamcrest)
