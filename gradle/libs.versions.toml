@@ -13,7 +13,7 @@ qodana = "2025.2.1"
 hamcrest = "2.2"
 # Has to be in sync with IntelliJ Platform
 composeuitest = "1.8.0-alpha04"
-jewelstandalone = "0.29.0-251.27828"
+jewelstandalone = "0.31.0-252.27409"
 skikoAwtRuntimeAll = "0.9.22"
 
 [libraries]

@@ -4,12 +4,16 @@
     <name>CodeLotus</name>
     <vendor>phodal</vendor>
 
-    <depends>com.intellij.modules.platform</depends>
+    <dependencies>
+        <module name="intellij.platform.compose"/>
+    </dependencies>
 
     <resource-bundle>messages.LotusBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.phodal.lotus.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <toolWindow factoryClass="com.phodal.lotus.toolWindow.CodeLotusWindowFactory"
+                    icon="com.phodal.lotus.ComposeIcons.ComposeToolWindow"
+                    id="MyToolWindow"/>
         <postStartupActivity implementation="com.phodal.lotus.startup.MyProjectActivity" />
     </extensions>
 </idea-plugin>

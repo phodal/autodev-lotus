@@ -18,6 +18,14 @@ version = providers.gradleProperty("pluginVersion").get()
 // Set the JVM language level used to build the project.
 kotlin {
     jvmToolchain(21)
+
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            listOf(
+                "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"
+            )
+        )
+    }
 }
 
 // Configure project's dependencies
@@ -28,6 +36,8 @@ repositories {
     intellijPlatform {
         defaultRepositories()
     }
+    // Needed for tests
+    google()
 }
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
