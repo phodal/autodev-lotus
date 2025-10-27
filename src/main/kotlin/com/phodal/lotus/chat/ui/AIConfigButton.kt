@@ -15,7 +15,7 @@ import org.jetbrains.jewel.ui.component.Text
 import org.jetbrains.jewel.ui.icons.AllIconsKeys
 import com.phodal.lotus.aicore.config.LLMProvider
 import com.phodal.lotus.chat.ChatAppColors
-import com.phodal.lotus.chat.config.AIConfigService
+import com.phodal.lotus.config.AIConfigService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 

@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.*
 import com.phodal.lotus.chat.model.ChatMessage
 import com.phodal.lotus.chat.repository.ChatRepositoryApi
 import com.phodal.lotus.aicore.config.LLMProvider
-import com.phodal.lotus.aicore.config.LLMConfigManager
 import com.phodal.lotus.aicore.AIServiceFactory
-import com.phodal.lotus.chat.config.AIConfigService
+import com.phodal.lotus.config.AIConfigService
 import com.phodal.lotus.chat.history.ConversationHistory
 import com.phodal.lotus.chat.history.ConversationManager
+import com.phodal.lotus.services.IdeaChatRepository
 
 interface ChatViewModelApi : Disposable {
     val chatMessagesFlow: StateFlow<List<ChatMessage>>
@@ -168,7 +168,7 @@ class ChatViewModel(
 
     override fun onAbortSendingMessage() {
         // First, cancel the streaming at the repository level to preserve generated content
-        if (repository is com.phodal.lotus.chat.repository.ChatRepository) {
+        if (repository is IdeaChatRepository) {
             repository.cancelCurrentStreaming("User interrupted")
         }
 

@@ -8,7 +8,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.phodal.lotus.CoroutineScopeHolder
 import com.phodal.lotus.chat.ChatApp
-import com.phodal.lotus.chat.repository.ChatRepository
+import com.phodal.lotus.services.IdeaChatRepository
 import com.phodal.lotus.chat.viewmodel.ChatViewModel
 import org.jetbrains.jewel.bridge.addComposeTab
 
@@ -29,7 +29,7 @@ class CodeLotusWindowFactory : ToolWindowFactory {
         val viewModel = ChatViewModel(
             project.service<CoroutineScopeHolder>()
                 .createScope(ChatViewModel::class.java.simpleName),
-            service<ChatRepository>()
+            service<IdeaChatRepository>()
         )
         Disposer.register(toolWindow.disposable, viewModel)
 

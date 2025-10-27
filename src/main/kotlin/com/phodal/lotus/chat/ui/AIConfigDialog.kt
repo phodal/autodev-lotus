@@ -2,7 +2,6 @@ package com.phodal.lotus.chat.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,7 +14,7 @@ import org.jetbrains.jewel.ui.component.*
 import com.phodal.lotus.aicore.config.LLMProvider
 import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.chat.ChatAppColors
-import com.phodal.lotus.chat.config.AIConfigService
+import com.phodal.lotus.config.AIConfigService
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 

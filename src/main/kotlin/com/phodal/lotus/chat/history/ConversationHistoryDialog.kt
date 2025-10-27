@@ -1,4 +1,4 @@
-package com.phodal.lotus.chat.ui
+package com.phodal.lotus.chat.history
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,11 +18,9 @@ import androidx.compose.ui.window.DialogProperties
 import org.jetbrains.jewel.foundation.theme.JewelTheme
 import org.jetbrains.jewel.ui.Orientation
 import org.jetbrains.jewel.ui.component.*
-import com.phodal.lotus.chat.history.ConversationHistory
 import com.phodal.lotus.chat.ChatAppColors
 import com.phodal.lotus.chat.ChatAppIcons
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 

@@ -1,6 +1,7 @@
 package com.phodal.lotus.chat.repository
 
 import com.phodal.lotus.chat.model.ChatMessage
+import com.phodal.lotus.services.IdeaChatRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
@@ -15,12 +16,12 @@ import org.junit.jupiter.api.Assertions.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChatRepositoryTest {
 
-    private lateinit var repository: ChatRepository
+    private lateinit var repository: IdeaChatRepository
 
     @BeforeEach
     fun setUp() {
         // Create repository instance
-        repository = ChatRepository()
+        repository = IdeaChatRepository()
     }
 
     @Test
