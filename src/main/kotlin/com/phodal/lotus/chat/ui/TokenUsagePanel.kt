@@ -17,12 +17,7 @@ import com.phodal.lotus.aicore.token.AggregatedTokenUsage
 import com.phodal.lotus.chat.ChatAppColors
 
 /**
- * Panel displaying token usage statistics
- * 
- * Shows:
- * - Total tokens used (input + output)
- * - Number of interactions
- * - Breakdown by model (if multiple models used)
+ * Compact one-line token usage display
  */
 @Composable
 fun TokenUsagePanel(
@@ -31,147 +26,60 @@ fun TokenUsagePanel(
 ) {
     val tracker = TokenUsageTracker.getInstance()
     val aggregatedUsage by tracker.aggregatedUsage.collectAsState()
-    
+
     // Get conversation-specific usage if conversationId is provided
-    val displayUsage = if (conversationId != null) {
+    val currentUsage = if (conversationId != null) {
         tracker.getConversationUsage(conversationId)
     } else {
         null
     }
-    
-    Column(
-        modifier = modifier
-            .background(ChatAppColors.Panel.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        // Title
-        Text(
-            text = "Token Usage",
-            style = JewelTheme.defaultTextStyle.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = ChatAppColors.Text.normal
+
+    if (aggregatedUsage.totalTokens > 0) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(ChatAppColors.Panel.background)
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            Text(
+                text = "🪙",
+                style = JewelTheme.defaultTextStyle.copy(fontSize = 14.sp)
             )
-        )
-        
-        // Current conversation stats (if available)
-        if (displayUsage != null && displayUsage.totalTokens > 0) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+
+            // Current conversation
+            if (currentUsage != null && currentUsage.totalTokens > 0) {
                 Text(
-                    text = "Current:",
+                    text = "Current: ${currentUsage.totalTokens}",
                     style = JewelTheme.defaultTextStyle.copy(
                         fontSize = 11.sp,
                         color = ChatAppColors.Text.normal
                     )
                 )
-                Text(
-                    text = "${displayUsage.totalTokens} tokens",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = ChatAppColors.Text.normal
-                    )
-                )
-            }
-            
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Input:",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 10.sp,
-                        color = ChatAppColors.Text.disabled
-                    )
-                )
-                Text(
-                    text = "${displayUsage.inputTokens}",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 10.sp,
-                        color = ChatAppColors.Text.normal
-                    )
-                )
+                Text(text = "•", style = JewelTheme.defaultTextStyle.copy(fontSize = 11.sp))
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Output:",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 10.sp,
-                        color = ChatAppColors.Text.disabled
-                    )
-                )
-                Text(
-                    text = "${displayUsage.outputTokens}",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 10.sp,
-                        color = ChatAppColors.Text.normal
-                    )
-                )
-            }
-        }
-        
-        // Total stats
-        if (aggregatedUsage.totalTokens > 0) {
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Total:",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 11.sp,
-                        color = ChatAppColors.Text.normal
-                    )
-                )
-                Text(
-                    text = "${aggregatedUsage.totalTokens} tokens",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = ChatAppColors.Text.normal
-                    )
-                )
-            }
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Interactions:",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 10.sp,
-                        color = ChatAppColors.Text.disabled
-                    )
-                )
-                Text(
-                    text = "${aggregatedUsage.interactionCount}",
-                    style = JewelTheme.defaultTextStyle.copy(
-                        fontSize = 10.sp,
-                        color = ChatAppColors.Text.normal
-                    )
-                )
-            }
-        } else {
-            // No usage yet
+            // Total usage
             Text(
-                text = "No tokens used yet",
+                text = "Total: ${aggregatedUsage.totalTokens}",
+                style = JewelTheme.defaultTextStyle.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = ChatAppColors.Text.normal
+                )
+            )
+
+            Text(text = "•", style = JewelTheme.defaultTextStyle.copy(fontSize = 11.sp))
+
+            // Interactions
+            Text(
+                text = "${aggregatedUsage.interactionCount} calls",
                 style = JewelTheme.defaultTextStyle.copy(
                     fontSize = 11.sp,
                     color = ChatAppColors.Text.disabled
-                ),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             )
         }
     }

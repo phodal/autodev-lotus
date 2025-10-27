@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
     alias(libs.plugins.composeCompiler) // Gradle Compose Compiler Plugin
+    kotlin("plugin.serialization") version "2.1.0" // Kotlin Serialization Plugin
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -46,6 +47,14 @@ dependencies {
     implementation(project(":ai-core")) {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
     }
+
+    // Xodus database for chat history
+    implementation("org.jetbrains.xodus:xodus-openAPI:2.0.1")
+    implementation("org.jetbrains.xodus:xodus-entity-store:2.0.1")
+    implementation("org.jetbrains.xodus:xodus-environment:2.0.1")
+
+    // Kotlinx serialization for JSON
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     testImplementation(kotlin("test"))
     testImplementation(libs.junit)
