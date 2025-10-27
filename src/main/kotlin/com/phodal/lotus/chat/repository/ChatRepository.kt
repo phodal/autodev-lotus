@@ -1,6 +1,7 @@
 package com.phodal.lotus.chat.repository
 
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.application.ApplicationManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -11,6 +12,7 @@ import kotlinx.coroutines.withContext
 import com.phodal.lotus.chat.model.ChatMessage
 import com.phodal.lotus.aicore.AIServiceFactory
 import java.time.LocalDateTime
+import kotlinx.coroutines.sync.Mutex
 
 /**
  * Interface defining the contract for managing chat messages and interactions within a chat system.
@@ -36,14 +38,21 @@ class ChatRepository : ChatRepositoryApi {
 
     private val chatMessageFactory = ChatMessageFactory("AI Buddy", "Super Engineer")
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
+    private val updateMutex = Mutex()
 
     override val messagesFlow: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
+
+    private fun updateMessagesOnEDT(updater: (List<ChatMessage>) -> List<ChatMessage>) {
+        _messages.value = updater(_messages.value)
+    }
 
     override suspend fun sendMessage(messageContent: String) {
         withContext(Dispatchers.IO) {
             try {
                 // Emits the user message to a chat list
-                _messages.value += chatMessageFactory.createUserMessage(messageContent)
+                updateMessagesOnEDT { messages ->
+                    messages + chatMessageFactory.createUserMessage(messageContent)
+                }
 
                 // Simulate AI responding
                 simulateAIResponse(messageContent)
@@ -51,7 +60,9 @@ class ChatRepository : ChatRepositoryApi {
                 if (e is CancellationException) {
                     // In case the message sending is canceled before a response is generated,
                     // we remove a loading placeholder message
-                    _messages.value = _messages.value.filter { !it.isAIThinkingMessage() }
+                    updateMessagesOnEDT { messages ->
+                        messages.filter { !it.isAIThinkingMessage() }
+                    }
 
                     throw e
 
@@ -65,7 +76,9 @@ class ChatRepository : ChatRepositoryApi {
     private suspend fun simulateAIResponse(userMessage: String) {
         val aiThinkingMessage = chatMessageFactory
             .createAIThinkingMessage("Thinking...")
-        _messages.value += aiThinkingMessage
+        updateMessagesOnEDT { messages ->
+            messages + aiThinkingMessage
+        }
 
         try {
             val aiClient = AIServiceFactory.getAIClient()
@@ -73,22 +86,45 @@ class ChatRepository : ChatRepositoryApi {
                 // Use real AI service with streaming
                 try {
                     val responseBuilder = StringBuilder()
+                    var lastUpdateTime = System.currentTimeMillis()
+                    val updateIntervalMs = 50L // Update UI at most every 50ms to avoid excessive updates
 
                     // Stream the response
                     aiClient.streamMessage(userMessage) { chunk ->
                         responseBuilder.append(chunk)
 
                         // Update the message in real-time as chunks arrive
-                        val responseMessage = chatMessageFactory.createAIMessage(content = responseBuilder.toString())
-                        _messages.value = _messages.value
-                            .map { message -> if (message.id == aiThinkingMessage.id) responseMessage else message }
+                        // Use throttling to avoid excessive UI updates
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - lastUpdateTime >= updateIntervalMs || chunk.endsWith("\n")) {
+                            lastUpdateTime = currentTime
+
+                            // Update the thinking message with the response content
+                            val responseMessage = chatMessageFactory.createAIMessage(content = responseBuilder.toString())
+                            updateMessagesOnEDT { messages ->
+                                messages.map { message ->
+                                    if (message.isAIThinkingMessage()) {
+                                        responseMessage
+                                    } else {
+                                        message
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Final update to ensure all content is displayed
+                    val finalResponseMessage = chatMessageFactory.createAIMessage(content = responseBuilder.toString())
+                    updateMessagesOnEDT { messages ->
+                        messages.map { message -> if (message.isAIThinkingMessage()) finalResponseMessage else message }
                     }
                 } catch (e: Exception) {
                     // Error message if AI service fails
                     val errorMessage = "Error: ${e.message}. Please check your AI configuration and try again."
                     val responseMessage = chatMessageFactory.createAIMessage(content = errorMessage)
-                    _messages.value = _messages.value
-                        .map { message -> if (message.id == aiThinkingMessage.id) responseMessage else message }
+                    updateMessagesOnEDT { messages ->
+                        messages.map { message -> if (message.isAIThinkingMessage()) responseMessage else message }
+                    }
                 }
             } else {
                 // Should not happen as input should be disabled without AI config
@@ -96,7 +132,9 @@ class ChatRepository : ChatRepositoryApi {
             }
         } catch (e: Exception) {
             // Remove thinking message on error
-            _messages.value = _messages.value.filter { !it.isAIThinkingMessage() }
+            updateMessagesOnEDT { messages ->
+                messages.filter { !it.isAIThinkingMessage() }
+            }
             throw e
         }
     }

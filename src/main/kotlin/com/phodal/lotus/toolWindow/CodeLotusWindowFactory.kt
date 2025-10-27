@@ -33,6 +33,6 @@ class CodeLotusWindowFactory : ToolWindowFactory {
         )
         Disposer.register(toolWindow.disposable, viewModel)
 
-        toolWindow.addComposeTab("Chat App") { ChatApp(viewModel) }
+        toolWindow.addComposeTab("Chat") { ChatApp(viewModel) }
     }
 }

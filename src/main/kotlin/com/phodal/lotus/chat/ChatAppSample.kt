@@ -36,14 +36,12 @@ fun ChatApp(viewModel: ChatViewModel) {
     val listState = rememberLazyListState()
     val textFieldState = rememberTextFieldState()
 
-    // Auto-scroll to the bottom when new messages arrive (only when not searching)
     LaunchedEffect(chatMessages.lastOrNull()?.id) {
         if (chatMessages.isNotEmpty() && !searchState.isSearching) {
             listState.animateScrollToItem(chatMessages.lastIndex)
         }
     }
 
-    // Auto-scroll to the current search result
     LaunchedEffect(searchState.currentSelectedSearchResultId) {
         val currentResultId = searchState.currentSelectedSearchResultId
         if (currentResultId != null) {
@@ -59,7 +57,6 @@ fun ChatApp(viewModel: ChatViewModel) {
             .fillMaxSize()
             .background(ChatAppColors.Panel.background)
     ) {
-        // Chat header with search button
         ChatHeaderWithSearchBar(
             searchState,
             onStartSearch = { viewModel.searchChatMessagesHandler().onStartSearch() },
@@ -170,7 +167,7 @@ private fun ChatHeaderWithSearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(ChatAppColors.Panel.background)
-            .padding(16.dp),
+            .padding(6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -192,7 +189,6 @@ private fun ChatHeaderWithSearchBar(
 
     Divider(Orientation.Horizontal, modifier = Modifier.fillMaxWidth().height(1.dp))
 
-    // Search bar (shown when search is active)
     if (showSearchBar) {
         ChatSearchBar(
             searchState = searchState,
@@ -207,27 +203,14 @@ private fun ChatHeaderWithSearchBar(
 }
 
 @Composable
-private fun ChatHeaderTitle(
-    modifier: Modifier = Modifier,
-    title: String = "AI Assistant Chat",
-    subtitle: String = "Chat with your AI Assistant! Ask questions, get help, or just have a conversation."
-) {
+private fun ChatHeaderTitle(modifier: Modifier = Modifier, title: String = "AutoDev Lotus") {
     Column(modifier = modifier) {
         Text(
             text = title,
             style = JewelTheme.defaultTextStyle.copy(
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
-            )
-        )
-
-        Text(
-            text = subtitle,
-            style = JewelTheme.defaultTextStyle.copy(
-                color = ChatAppColors.Text.disabled,
                 fontSize = 14.sp
-            ),
-            modifier = Modifier.padding(top = 4.dp)
+            )
         )
     }
 }

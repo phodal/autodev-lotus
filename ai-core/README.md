@@ -1,6 +1,6 @@
 # AI Core Module
 
-The `ai-core` module provides a unified interface for integrating multiple LLM (Large Language Model) providers into the Lotus Chat application. It uses the Koog framework to support various AI providers.
+The `ai-core` module provides a unified interface for integrating multiple LLM (Large Language Model) providers into the Lotus Chat application. It uses the LangChain4j framework to support various AI providers.
 
 ## Supported LLM Providers
 
@@ -29,7 +29,7 @@ The `ai-core` module provides a unified interface for integrating multiple LLM (
    - `streamMessage()` - Stream responses for real-time updates
    - `isConfigured()` - Check if client is properly configured
 
-4. **KoogAIClient** - Implementation using Koog framework
+4. **LangChain4jAIClient** - Implementation using LangChain4j framework
    - Supports all LLM providers
    - Handles API communication
    - Error handling and fallbacks
@@ -155,7 +155,7 @@ This module is designed to be independent and can be extracted into a standalone
 
 ## Dependencies
 
-- Koog Framework (0.1.0+)
+- LangChain4j (0.31.0+)
 - Kotlin Coroutines (1.10.1+)
 - Kotlin Standard Library
 
