@@ -43,7 +43,9 @@ repositories {
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
     // AI Core module
-    implementation(project(":ai-core"))
+    implementation(project(":ai-core")) {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+    }
 
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)

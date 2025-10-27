@@ -14,7 +14,7 @@ dependencies {
     implementation("ai.koog:koog-agents:0.1.0")
 
     // Kotlin coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 
     // Testing
     testImplementation(kotlin("test"))
