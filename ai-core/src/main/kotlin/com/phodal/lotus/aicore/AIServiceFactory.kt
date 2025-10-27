@@ -1,7 +1,7 @@
 package com.phodal.lotus.aicore
 
 import com.phodal.lotus.aicore.client.AIClient
-import com.phodal.lotus.aicore.client.LangChain4jAIClient
+import com.phodal.lotus.aicore.client.langchain.LangChain4jAIClient
 import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.aicore.config.ConfigProvider
 

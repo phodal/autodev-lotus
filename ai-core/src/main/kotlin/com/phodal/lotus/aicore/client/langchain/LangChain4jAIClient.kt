@@ -1,5 +1,7 @@
-package com.phodal.lotus.aicore.client
+package com.phodal.lotus.aicore.client.langchain
 
+import com.phodal.lotus.aicore.client.AIClient
+import com.phodal.lotus.aicore.client.AIMessageResult
 import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.chat.StreamingChatModel
 import dev.langchain4j.model.chat.response.ChatResponse
@@ -13,7 +15,6 @@ import dev.langchain4j.model.googleai.GoogleAiGeminiStreamingChatModel
 import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.aicore.config.LLMProvider
 import com.phodal.lotus.aicore.token.TokenUsage
-import com.phodal.lotus.aicore.token.LangChain4jTokenCounter
 import com.phodal.lotus.aicore.token.TokenUsageTracker
 import com.phodal.lotus.aicore.streaming.StreamingCancellationToken
 import java.time.Duration

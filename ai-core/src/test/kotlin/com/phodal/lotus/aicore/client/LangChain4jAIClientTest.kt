@@ -1,5 +1,6 @@
 package com.phodal.lotus.aicore.client
 
+import com.phodal.lotus.aicore.client.langchain.LangChain4jAIClient
 import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.aicore.config.LLMProvider
 import org.junit.jupiter.api.Test
