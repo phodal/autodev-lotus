@@ -23,7 +23,7 @@ interface ChatViewModelApi : Disposable {
 
     val promptInputState: StateFlow<MessageInputState>
 
-    fun onAIConfigSaved(provider: LLMProvider, apiKey: String)
+    fun onAIConfigSaved(provider: LLMProvider, apiKey: String, model: String)
 
     val isAIConfigured: StateFlow<Boolean>
 
@@ -128,10 +128,11 @@ class ChatViewModel(
 
     override fun searchChatMessagesHandler(): SearchChatMessagesHandler = searchChatMessagesHandler
 
-    override fun onAIConfigSaved(provider: LLMProvider, apiKey: String) {
+    override fun onAIConfigSaved(provider: LLMProvider, apiKey: String, model: String) {
         val config = com.phodal.lotus.aicore.config.LLMConfig(
             provider = provider,
-            apiKey = apiKey
+            apiKey = apiKey,
+            model = model
         )
         configService.saveConfig(config)
     }

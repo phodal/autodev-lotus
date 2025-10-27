@@ -13,6 +13,7 @@ import org.jetbrains.jewel.foundation.theme.JewelTheme
 import org.jetbrains.jewel.ui.Orientation
 import org.jetbrains.jewel.ui.component.*
 import com.phodal.lotus.aicore.config.LLMProvider
+import com.phodal.lotus.aicore.config.LLMConfig
 import com.phodal.lotus.chat.ChatAppColors
 import com.phodal.lotus.chat.config.AIConfigService
 import kotlinx.coroutines.flow.first
@@ -24,9 +25,10 @@ import kotlinx.coroutines.runBlocking
 @Composable
 fun AIConfigDialog(
     onDismiss: () -> Unit,
-    onSave: (provider: LLMProvider, apiKey: String) -> Unit,
+    onSave: (provider: LLMProvider, apiKey: String, model: String) -> Unit,
     currentProvider: LLMProvider? = null,
-    currentApiKey: String = ""
+    currentApiKey: String = "",
+    currentModel: String = ""
 ) {
     // Load saved configuration from AIConfigService
     val configService = AIConfigService.getInstance()
@@ -34,10 +36,18 @@ fun AIConfigDialog(
 
     val initialProvider = currentProvider ?: savedConfig?.provider ?: LLMProvider.DEEPSEEK
     val initialApiKey = currentApiKey.ifBlank { savedConfig?.apiKey ?: "" }
+    val initialModel = currentModel.ifBlank { savedConfig?.model ?: LLMConfig.getDefaultModel(initialProvider) }
 
     var selectedProvider by remember { mutableStateOf(initialProvider) }
-    var isDropdownExpanded by remember { mutableStateOf(false) }
+    var isProviderDropdownExpanded by remember { mutableStateOf(false) }
+    var isModelDropdownExpanded by remember { mutableStateOf(false) }
+    var useCustomModel by remember { mutableStateOf(false) }
+
+    val availableModels = LLMConfig.getAvailableModels(selectedProvider)
     val apiKeyState = rememberTextFieldState(initialApiKey)
+    val customModelState = rememberTextFieldState(initialModel)
+
+    var selectedModel by remember { mutableStateOf(initialModel) }
 
     Column(
         modifier = Modifier
@@ -62,7 +72,7 @@ fun AIConfigDialog(
 
         Box(modifier = Modifier.fillMaxWidth()) {
             DefaultButton(
-                onClick = { isDropdownExpanded = !isDropdownExpanded },
+                onClick = { isProviderDropdownExpanded = !isProviderDropdownExpanded },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -80,7 +90,7 @@ fun AIConfigDialog(
                 }
             }
 
-            if (isDropdownExpanded) {
+            if (isProviderDropdownExpanded) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -91,7 +101,9 @@ fun AIConfigDialog(
                         DefaultButton(
                             onClick = {
                                 selectedProvider = provider
-                                isDropdownExpanded = false
+                                selectedModel = LLMConfig.getDefaultModel(provider)
+                                useCustomModel = false
+                                isProviderDropdownExpanded = false
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -117,6 +129,120 @@ fun AIConfigDialog(
                     }
                 }
             }
+        }
+
+        // Model Selection
+        Text(
+            text = "Model",
+            style = JewelTheme.defaultTextStyle
+        )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            DefaultButton(
+                onClick = { isModelDropdownExpanded = !isModelDropdownExpanded },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (useCustomModel) "Custom: ${customModelState.text}" else selectedModel,
+                        style = JewelTheme.defaultTextStyle.copy(fontSize = 14.sp),
+                        maxLines = 1
+                    )
+                    Text("▼", modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+
+            if (isModelDropdownExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(ChatAppColors.Panel.background)
+                        .padding(top = 2.dp)
+                ) {
+                    // Available models
+                    availableModels.forEach { model ->
+                        DefaultButton(
+                            onClick = {
+                                selectedModel = model
+                                useCustomModel = false
+                                isModelDropdownExpanded = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    model,
+                                    style = JewelTheme.defaultTextStyle.copy(fontSize = 13.sp)
+                                )
+                                if (model == selectedModel && !useCustomModel) {
+                                    Text(
+                                        " ✓",
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        style = JewelTheme.defaultTextStyle.copy(fontSize = 13.sp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Divider(Orientation.Horizontal, modifier = Modifier.fillMaxWidth().height(1.dp))
+
+                    // Custom model option
+                    DefaultButton(
+                        onClick = {
+                            useCustomModel = true
+                            isModelDropdownExpanded = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Custom Model...",
+                                style = JewelTheme.defaultTextStyle.copy(fontSize = 13.sp)
+                            )
+                            if (useCustomModel) {
+                                Text(
+                                    " ✓",
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    style = JewelTheme.defaultTextStyle.copy(fontSize = 13.sp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Custom Model Input
+        if (useCustomModel) {
+            Text(
+                text = "Enter custom model name:",
+                style = JewelTheme.defaultTextStyle.copy(fontSize = 12.sp),
+                color = ChatAppColors.Text.timestamp
+            )
+            TextArea(
+                state = customModelState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+            )
         }
 
         // API Key Input
@@ -159,13 +285,14 @@ fun AIConfigDialog(
             DefaultButton(
                 onClick = {
                     val apiKey = apiKeyState.text.toString()
-                    if (apiKey.isNotBlank()) {
-                        onSave(selectedProvider, apiKey)
+                    val model = if (useCustomModel) customModelState.text.toString() else selectedModel
+                    if (apiKey.isNotBlank() && model.isNotBlank()) {
+                        onSave(selectedProvider, apiKey, model)
                         onDismiss()
                     }
                 },
                 modifier = Modifier.wrapContentSize(),
-                enabled = apiKeyState.text.isNotEmpty()
+                enabled = apiKeyState.text.isNotEmpty() && (if (useCustomModel) customModelState.text.isNotEmpty() else true)
             ) {
                 Text("Save")
             }

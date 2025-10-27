@@ -67,7 +67,7 @@ fun ChatApp(viewModel: ChatViewModel) {
             onSearchQueryChange = { query -> viewModel.searchChatMessagesHandler().onSearchQuery(query) },
             onNextResult = { viewModel.searchChatMessagesHandler().onNavigateToNextSearchResult() },
             onPreviousResult = { viewModel.searchChatMessagesHandler().onNavigateToPreviousSearchResult() },
-            onAIConfigSaved = { provider, apiKey -> viewModel.onAIConfigSaved(provider, apiKey) },
+            onAIConfigSaved = { provider, apiKey, model -> viewModel.onAIConfigSaved(provider, apiKey, model) },
             isAIConfigured = isAIConfigured,
             currentAIProvider = currentAIProvider
         )
@@ -160,7 +160,7 @@ private fun ChatHeaderWithSearchBar(
     onSearchQueryChange: (String) -> Unit,
     onNextResult: () -> Unit,
     onPreviousResult: () -> Unit,
-    onAIConfigSaved: (com.phodal.lotus.aicore.config.LLMProvider, String) -> Unit = { _, _ -> },
+    onAIConfigSaved: (com.phodal.lotus.aicore.config.LLMProvider, String, String) -> Unit = { _, _, _ -> },
     isAIConfigured: Boolean = false,
     currentAIProvider: com.phodal.lotus.aicore.config.LLMProvider? = null
 ) {

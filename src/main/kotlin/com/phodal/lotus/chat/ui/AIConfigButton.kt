@@ -24,9 +24,10 @@ import kotlinx.coroutines.runBlocking
  */
 @Composable
 fun AIConfigButton(
-    onConfigSaved: (provider: LLMProvider, apiKey: String) -> Unit,
+    onConfigSaved: (provider: LLMProvider, apiKey: String, model: String) -> Unit,
     currentProvider: LLMProvider? = null,
     currentApiKey: String = "",
+    currentModel: String = "",
     isConfigured: Boolean = false
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -102,11 +103,12 @@ fun AIConfigButton(
         ) {
             AIConfigDialog(
                 onDismiss = { showDialog = false },
-                onSave = { provider, apiKey ->
-                    onConfigSaved(provider, apiKey)
+                onSave = { provider, apiKey, model ->
+                    onConfigSaved(provider, apiKey, model)
                 },
                 currentProvider = displayProvider,
-                currentApiKey = displayApiKey
+                currentApiKey = displayApiKey,
+                currentModel = currentModel
             )
         }
     }

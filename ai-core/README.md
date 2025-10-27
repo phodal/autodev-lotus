@@ -48,11 +48,44 @@ The `ai-core` module provides a unified interface for integrating multiple LLM (
 val configManager = LLMConfigManager()
 val viewModel = ChatViewModel(coroutineScope, repository, configManager)
 
-// Save AI configuration
-viewModel.onAIConfigSaved(LLMProvider.DEEPSEEK, "your-api-key")
+// Save AI configuration with model selection
+viewModel.onAIConfigSaved(
+    provider = LLMProvider.OPENAI,
+    apiKey = "your-api-key",
+    model = "gpt-4o"  // or use custom model name
+)
 
 // Check if AI is configured
 val isConfigured = viewModel.isAIConfigured.collectAsState()
+```
+
+### Available Models
+
+Each provider has a set of recommended models:
+
+```kotlin
+// Get available models for a provider
+val openaiModels = LLMConfig.getAvailableModels(LLMProvider.OPENAI)
+// Returns: [o4-mini, o3-mini, gpt-4o, gpt-4o-mini]
+
+val claudeModels = LLMConfig.getAvailableModels(LLMProvider.CLAUDE)
+// Returns: [claude-3-5-sonnet-latest, claude-3-5-haiku-latest, ...]
+
+// Get default model for a provider
+val defaultModel = LLMConfig.getDefaultModel(LLMProvider.CLAUDE)
+// Returns: claude-3-5-sonnet-latest
+```
+
+### Custom Models
+
+You can also use custom model names (useful for new models or special configurations):
+
+```kotlin
+val config = LLMConfig(
+    provider = LLMProvider.OPENAI,
+    apiKey = "your-api-key",
+    model = "gpt-4-turbo-2024-04-09"  // Custom model name
+)
 ```
 
 ### In ChatRepository
@@ -74,15 +107,22 @@ private suspend fun simulateAIResponse(userMessage: String) {
 
 ## Configuration
 
-### Setting Up API Keys
+### Setting Up API Keys and Models
 
 1. Open the Chat App
 2. Click the Settings icon (⚙️) in the header
 3. Select your preferred LLM provider
-4. Enter your API key
-5. Click Save
+4. Choose a model from the dropdown list, or select "Custom Model..." to enter a custom model name
+5. Enter your API key
+6. Click Save
 
-Your API key is stored locally in `~/.lotus/ai/llm_config.properties` and never sent to external servers.
+Your API key and model configuration are stored locally in `~/.lotus/ai/llm_config.properties` and never sent to external servers.
+
+### Model Selection
+
+- **Predefined Models**: Each provider has a curated list of recommended models. Select from the dropdown for quick access.
+- **Custom Models**: If you need to use a newer model or a specific model variant, select "Custom Model..." and enter the model name directly.
+- **Default Models**: If no model is specified, the system uses the latest recommended model for the selected provider.
 
 ### Environment Variables
 
