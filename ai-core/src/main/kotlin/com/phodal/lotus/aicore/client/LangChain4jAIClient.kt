@@ -15,8 +15,11 @@ import com.phodal.lotus.aicore.config.LLMProvider
 import com.phodal.lotus.aicore.token.TokenUsage
 import com.phodal.lotus.aicore.token.LangChain4jTokenCounter
 import com.phodal.lotus.aicore.token.TokenUsageTracker
+import com.phodal.lotus.aicore.streaming.StreamingCancellationToken
 import java.time.Duration
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -149,7 +152,11 @@ class LangChain4jAIClient(
         }
     }
 
-    override suspend fun streamMessage(message: String, onChunk: (String) -> Unit): TokenUsage? {
+    override suspend fun streamMessage(
+        message: String,
+        onChunk: (String) -> Unit,
+        cancellationToken: Any?
+    ): TokenUsage? {
         return suspendCancellableCoroutine { continuation ->
             try {
                 val inputTokens = tokenCounter.estimateTokenCount(message)
@@ -159,6 +166,13 @@ class LangChain4jAIClient(
                     message,
                     object : StreamingChatResponseHandler {
                         override fun onPartialResponse(partialResponse: String) {
+                            // Check for cancellation before processing chunk
+                            if (cancellationToken is StreamingCancellationToken) {
+                                if (cancellationToken.checkCancellation()) {
+                                    return
+                                }
+                            }
+
                             responseBuilder.append(partialResponse)
                             onChunk(partialResponse)
                         }
@@ -175,8 +189,8 @@ class LangChain4jAIClient(
                                 conversationId = conversationId
                             )
 
-                            // Record token usage asynchronously
-                            kotlinx.coroutines.runBlocking {
+                            // Record token usage asynchronously without blocking
+                            GlobalScope.launch {
                                 tokenUsageTracker.recordUsage(tokenUsage)
                             }
 

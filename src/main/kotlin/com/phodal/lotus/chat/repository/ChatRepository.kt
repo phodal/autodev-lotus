@@ -11,6 +11,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.currentCoroutineContext
 import com.phodal.lotus.chat.model.ChatMessage
 import com.phodal.lotus.aicore.AIServiceFactory
+import com.phodal.lotus.aicore.streaming.StreamingCancellationToken
 
 /**
  * Interface defining the contract for managing chat messages and interactions within a chat system.
@@ -72,6 +73,9 @@ class ChatRepository : ChatRepositoryApi {
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     private val updateMutex = Mutex()
 
+    // Cancellation token for the current streaming operation
+    private var currentStreamingCancellationToken: StreamingCancellationToken? = null
+
     override val messagesFlow: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
     private suspend fun updateMessages(updater: (List<ChatMessage>) -> List<ChatMessage>) {
@@ -80,8 +84,20 @@ class ChatRepository : ChatRepositoryApi {
         }
     }
 
+    /**
+     * Cancel the current streaming operation gracefully.
+     * The already-generated content will be preserved.
+     */
+    fun cancelCurrentStreaming(reason: String = "User requested") {
+        currentStreamingCancellationToken?.cancel(reason)
+    }
+
     override suspend fun sendMessage(messageContent: String): Flow<ChatRepositoryApi.ChatStreamEvent> = flow {
         var aiMessageId: String? = null
+        // Create a new cancellation token for this streaming operation
+        val cancellationToken = StreamingCancellationToken()
+        currentStreamingCancellationToken = cancellationToken
+
         try {
             // Emits the user message to a chat list
             updateMessages { messages ->
@@ -89,7 +105,7 @@ class ChatRepository : ChatRepositoryApi {
             }
 
             // Generate AI response with streaming and emit events
-            streamAIResponse(messageContent).collect { event ->
+            streamAIResponse(messageContent, cancellationToken).collect { event ->
                 aiMessageId = when (event) {
                     is ChatRepositoryApi.ChatStreamEvent.Started -> event.aiMessageId
                     is ChatRepositoryApi.ChatStreamEvent.Delta -> event.aiMessageId
@@ -100,11 +116,39 @@ class ChatRepository : ChatRepositoryApi {
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
-                // In case the message sending is canceled before a response is generated,
-                // we remove the AI thinking placeholder message by id
-                aiMessageId?.let { id ->
-                    updateMessages { messages ->
-                        messages.filter { it.id != id }
+                // Check if this was a user-initiated cancellation (via Stop button)
+                // If so, preserve the content that was already generated
+                if (cancellationToken.checkCancellation()) {
+                    // User initiated cancellation - preserve the content
+                    aiMessageId?.let { id ->
+                        val currentContent = _messages.value.find { it.id == id }?.content ?: ""
+                        if (currentContent.isNotEmpty() && currentContent != "Thinking...") {
+                            // Content was generated, keep it
+                            updateMessages { messages ->
+                                messages.map { message ->
+                                    if (message.id == id) {
+                                        message.copy(
+                                            type = ChatMessage.ChatMessageType.TEXT,
+                                            isStreaming = false
+                                        )
+                                    } else {
+                                        message
+                                    }
+                                }
+                            }
+                        } else {
+                            // No content was generated, remove the thinking message
+                            updateMessages { messages ->
+                                messages.filter { it.id != id }
+                            }
+                        }
+                    }
+                } else {
+                    // System cancellation - remove the AI thinking placeholder message
+                    aiMessageId?.let { id ->
+                        updateMessages { messages ->
+                            messages.filter { it.id != id }
+                        }
                     }
                 }
                 throw e
@@ -114,14 +158,21 @@ class ChatRepository : ChatRepositoryApi {
             aiMessageId?.let { id ->
                 emit(ChatRepositoryApi.ChatStreamEvent.Error(id, e))
             } ?: emit(ChatRepositoryApi.ChatStreamEvent.Error(null, e))
+        } finally {
+            currentStreamingCancellationToken = null
         }
     }.flowOn(Dispatchers.IO)
 
     /**
      * Streams AI response and emits streaming events.
      * Updates the message content incrementally as chunks arrive.
+     * @param userMessage The user's message to send to AI
+     * @param cancellationToken Token to control streaming cancellation
      */
-    private suspend fun streamAIResponse(userMessage: String): Flow<ChatRepositoryApi.ChatStreamEvent> = flow {
+    private suspend fun streamAIResponse(
+        userMessage: String,
+        cancellationToken: StreamingCancellationToken
+    ): Flow<ChatRepositoryApi.ChatStreamEvent> = flow {
         // Generate a unique ID for this AI response
         val aiMessageId = java.util.UUID.randomUUID().toString()
 
@@ -146,10 +197,10 @@ class ChatRepository : ChatRepositoryApi {
                     var lastUpdateTime = System.currentTimeMillis()
                     val updateIntervalMs = 50L // Update UI at most every 50ms to avoid excessive updates
 
-                    // Stream the response (now returns TokenUsage)
-                    val tokenUsage = aiClient.streamMessage(userMessage) { chunk ->
-                        // Check if coroutine is still active
-                        if (!kotlinx.coroutines.runBlocking { currentCoroutineContext().isActive }) {
+                    // Stream the response with cancellation token support
+                    val tokenUsage = aiClient.streamMessage(userMessage, { chunk ->
+                        // Check for cancellation request
+                        if (cancellationToken.checkCancellation()) {
                             return@streamMessage
                         }
 
@@ -162,9 +213,10 @@ class ChatRepository : ChatRepositoryApi {
                             lastUpdateTime = currentTime
 
                             // Update the message by ID with the accumulated response content
-                            kotlinx.coroutines.runBlocking {
-                                updateMessages { messages ->
-                                    messages.map { message ->
+                            // Use direct state update instead of runBlocking to avoid EDT freezing
+                            if (updateMutex.tryLock()) {
+                                try {
+                                    _messages.value = _messages.value.map { message ->
                                         if (message.id == aiMessageId) {
                                             message.copy(
                                                 content = responseBuilder.toString(),
@@ -174,12 +226,12 @@ class ChatRepository : ChatRepositoryApi {
                                             message
                                         }
                                     }
+                                } finally {
+                                    updateMutex.unlock()
                                 }
-
-                                // Emit Delta event (note: this is inside runBlocking, but flow emission happens in outer scope)
                             }
                         }
-                    }
+                    }, cancellationToken)
 
                     // Final update: convert to TEXT type, mark as not streaming, and ensure all content is displayed
                     val finalContent = responseBuilder.toString()
@@ -200,21 +252,48 @@ class ChatRepository : ChatRepositoryApi {
                     // Emit Completed event (token usage is now tracked automatically in AIClient)
                     emit(ChatRepositoryApi.ChatStreamEvent.Completed(aiMessageId, finalContent))
                 } catch (e: Exception) {
-                    // Error message if AI service fails
-                    val errorMessage = "Error: ${e.message}. Please check your AI configuration and try again."
-                    updateMessages { messages ->
-                        messages.map { message ->
-                            if (message.id == aiMessageId) {
-                                message.copy(
-                                    content = errorMessage,
-                                    type = ChatMessage.ChatMessageType.TEXT
-                                )
-                            } else {
-                                message
+                    // Check if this was a cancellation
+                    if (cancellationToken.checkCancellation()) {
+                        // Preserve the content that was already generated
+                        val currentContent = _messages.value.find { it.id == aiMessageId }?.content ?: ""
+                        if (currentContent.isNotEmpty() && currentContent != "Thinking...") {
+                            updateMessages { messages ->
+                                messages.map { message ->
+                                    if (message.id == aiMessageId) {
+                                        message.copy(
+                                            content = currentContent,
+                                            type = ChatMessage.ChatMessageType.TEXT,
+                                            isStreaming = false
+                                        )
+                                    } else {
+                                        message
+                                    }
+                                }
+                            }
+                            emit(ChatRepositoryApi.ChatStreamEvent.Completed(aiMessageId, currentContent))
+                        } else {
+                            // No content was generated, remove the thinking message
+                            updateMessages { messages ->
+                                messages.filter { it.id != aiMessageId }
                             }
                         }
+                    } else {
+                        // Error message if AI service fails
+                        val errorMessage = "Error: ${e.message}. Please check your AI configuration and try again."
+                        updateMessages { messages ->
+                            messages.map { message ->
+                                if (message.id == aiMessageId) {
+                                    message.copy(
+                                        content = errorMessage,
+                                        type = ChatMessage.ChatMessageType.TEXT
+                                    )
+                                } else {
+                                    message
+                                }
+                            }
+                        }
+                        emit(ChatRepositoryApi.ChatStreamEvent.Error(aiMessageId, e))
                     }
-                    emit(ChatRepositoryApi.ChatStreamEvent.Error(aiMessageId, e))
                 }
             } else {
                 // Should not happen as input should be disabled without AI config

@@ -137,6 +137,12 @@ class ChatViewModel(
     }
 
     override fun onAbortSendingMessage() {
+        // First, cancel the streaming at the repository level to preserve generated content
+        if (repository is com.phodal.lotus.chat.repository.ChatRepository) {
+            repository.cancelCurrentStreaming("User interrupted")
+        }
+
+        // Then cancel the coroutine job
         currentSendMessageJob?.cancel()
 
         emitPromptInputState(

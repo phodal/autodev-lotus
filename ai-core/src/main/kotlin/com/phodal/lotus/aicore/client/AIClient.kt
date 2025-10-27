@@ -24,9 +24,14 @@ interface AIClient {
      * Stream a message response
      * @param message The message to send
      * @param onChunk Callback for each chunk of the response
+     * @param cancellationToken Optional token to control streaming cancellation
      * @return TokenUsage information after streaming completes
      */
-    suspend fun streamMessage(message: String, onChunk: (String) -> Unit): TokenUsage?
+    suspend fun streamMessage(
+        message: String,
+        onChunk: (String) -> Unit,
+        cancellationToken: Any? = null
+    ): TokenUsage?
 
     /**
      * Check if the client is properly configured
