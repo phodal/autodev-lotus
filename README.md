@@ -7,9 +7,9 @@
 ## Template ToDo list
 - [x] Create a new [IntelliJ Platform Plugin Template][template] project.
 - [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
+- [x] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
+- [x] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
+- [x] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
 - [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
 - [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
 - [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
@@ -18,12 +18,19 @@
 - [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
-
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
-
-To keep everything working, do not remove `<!-- ... -->` sections. 
+AutoDev CodeLotus is a context-intelligence middleware layer designed to serve as the “context brain” for
+AI-driven coding tools. Rather than being another end-user code-assistant, CodeLotus provides upstream capabilities —
+rich semantic context, version-history awareness, graph‐based relationships and context-compression services — enabling
+other AI coding tools to be far more effective and accurate. 
 <!-- Plugin description end -->
+
+Key Value Proposition:
+
+* **MCP & A2A native** — built for model-to-tool and agent-to-agent interoperability, enabling seamless context sharing across AI assistants.
+* **Deep semantic understanding** — parses ASTs, dependencies, and code graphs to deliver structured, high-fidelity context.
+* **History-aware** — integrates Git evolution and refactor tracking for time-aware contextual insight.
+* **Graph + compression engine** — extracts, ranks, and compresses relevant context into model-ready blocks.
+* **Shared context fabric** — one unified context backbone for all AI coding tools and agents.
 
 ## Installation
 

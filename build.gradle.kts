@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
+    alias(libs.plugins.composeCompiler) // Gradle Compose Compiler Plugin
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -33,6 +34,12 @@ repositories {
 dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.composeuitest)
+    testImplementation(libs.jewelstandalone)
+    // Workaround for running tests on Windows and Linux
+    // It provides necessary Skiko runtime native binaries
+    testImplementation(libs.skikoAwtRuntimeAll)
 
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
@@ -46,6 +53,16 @@ dependencies {
 
         // Module Dependencies. Uses `platformBundledModules` property from the gradle.properties file for bundled IntelliJ Platform modules.
         bundledModules(providers.gradleProperty("platformBundledModules").map { it.split(',') })
+
+        // Compose support dependencies
+        bundledModules(
+            "intellij.libraries.skiko",
+            "intellij.libraries.compose.foundation.desktop",
+            "intellij.platform.jewel.foundation",
+            "intellij.platform.jewel.ui",
+            "intellij.platform.jewel.ideLafBridge",
+            "intellij.platform.compose"
+        )
 
         testFramework(TestFrameworkType.Platform)
     }
@@ -104,7 +121,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            create(providers.gradleProperty("platformType"), providers.gradleProperty("platformVersion"))
         }
     }
 }
