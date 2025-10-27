@@ -1,12 +1,12 @@
 package com.phodal.lotus.aicore.summarization
 
-import com.phodal.lotus.aicore.token.SimpleTokenCounter
+import com.phodal.lotus.aicore.token.FallbackTokenCounter
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
 class ContentSelectionStrategyTest {
     
-    private val tokenCounter = SimpleTokenCounter("test-model")
+    private val tokenCounter = FallbackTokenCounter("test-model")
     
     private fun createTestMessages(): List<ConversationMessage> {
         return listOf(

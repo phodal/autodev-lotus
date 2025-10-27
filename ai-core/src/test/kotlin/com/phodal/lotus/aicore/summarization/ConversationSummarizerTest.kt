@@ -2,7 +2,7 @@ package com.phodal.lotus.aicore.summarization
 
 import com.phodal.lotus.aicore.client.AIClient
 import com.phodal.lotus.aicore.client.AIMessageResult
-import com.phodal.lotus.aicore.token.SimpleTokenCounter
+import com.phodal.lotus.aicore.token.FallbackTokenCounter
 import com.phodal.lotus.aicore.token.TokenUsage
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.*
 
 class ConversationSummarizerTest {
     
-    private val tokenCounter = SimpleTokenCounter("test-model")
+    private val tokenCounter = FallbackTokenCounter("test-model")
     
     private fun createMockAIClient(): AIClient {
         return object : AIClient {

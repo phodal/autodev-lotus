@@ -7,7 +7,7 @@ class TokenCounterTest {
     
     @Test
     fun testSimpleTokenCounter() {
-        val counter = SimpleTokenCounter("test-model")
+        val counter = FallbackTokenCounter("test-model")
         
         val text = "Hello world this is a test"
         val tokenCount = counter.estimateTokenCount(text)
@@ -20,7 +20,7 @@ class TokenCounterTest {
     
     @Test
     fun testSimpleTokenCounterEmptyText() {
-        val counter = SimpleTokenCounter()
+        val counter = FallbackTokenCounter()
         
         assertEquals(0, counter.estimateTokenCount(""))
         assertEquals(0, counter.estimateTokenCount("   "))
@@ -28,7 +28,7 @@ class TokenCounterTest {
     
     @Test
     fun testSimpleTokenCounterMultipleMessages() {
-        val counter = SimpleTokenCounter()
+        val counter = FallbackTokenCounter()
         
         val messages = listOf(
             "Hello world",

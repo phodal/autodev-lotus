@@ -21,7 +21,7 @@ class JtokKitTokenCounter(private val modelName: String) : TokenCounter {
         createJtokKitCounter(modelName)
     } catch (e: Exception) {
         // Fallback to SimpleTokenCounter if jtokkit is not available
-        SimpleTokenCounter(modelName)
+        FallbackTokenCounter(modelName)
     }
     
     override fun estimateTokenCount(text: String): Int {
