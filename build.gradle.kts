@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
     alias(libs.plugins.composeCompiler) // Gradle Compose Compiler Plugin
-    kotlin("plugin.serialization") version "2.1.0" // Kotlin Serialization Plugin
+    kotlin("plugin.serialization") version "2.2.21" // Kotlin Serialization Plugin
 }
 
 group = providers.gradleProperty("pluginGroup").get()
