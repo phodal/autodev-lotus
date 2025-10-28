@@ -22,6 +22,21 @@ coroutinesTest = "1.10.1"
 mcp = "0.7.4"
 ktor = "3.3.1"
 
+# Xodus database
+xodus = "2.0.1"
+
+# Kotlinx serialization
+kotlinxSerialization = "1.7.3"
+
+# LangChain4j
+langchain4j = "1.7.1"
+
+# Kotlin coroutines
+kotlinxCoroutines = "1.10.1"
+
+# Token counting
+jtokkit = "1.1.0"
+
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
@@ -36,6 +51,26 @@ mcp = { group = "io.modelcontextprotocol", name = "kotlin-sdk", version.ref = "m
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty", version.ref = "ktor" }
 coroutinesTest = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+
+# Xodus database
+xodusOpenapi = { group = "org.jetbrains.xodus", name = "xodus-openAPI", version.ref = "xodus" }
+xodusEntityStore = { group = "org.jetbrains.xodus", name = "xodus-entity-store", version.ref = "xodus" }
+xodusEnvironment = { group = "org.jetbrains.xodus", name = "xodus-environment", version.ref = "xodus" }
+
+# Kotlinx serialization
+kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+# LangChain4j
+langchain4j = { group = "dev.langchain4j", name = "langchain4j", version.ref = "langchain4j" }
+langchain4jOpenai = { group = "dev.langchain4j", name = "langchain4j-open-ai", version.ref = "langchain4j" }
+langchain4jAnthropic = { group = "dev.langchain4j", name = "langchain4j-anthropic", version.ref = "langchain4j" }
+langchain4jGoogleaigemini = { group = "dev.langchain4j", name = "langchain4j-google-ai-gemini", version.ref = "langchain4j" }
+
+# Kotlin coroutines
+kotlinxCoroutinesCore = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+
+# Token counting
+jtokkit = { group = "com.knuddels", name = "jtokkit", version.ref = "jtokkit" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }

@@ -49,12 +49,12 @@ dependencies {
     }
 
     // Xodus database for chat history
-    implementation("org.jetbrains.xodus:xodus-openAPI:2.0.1")
-    implementation("org.jetbrains.xodus:xodus-entity-store:2.0.1")
-    implementation("org.jetbrains.xodus:xodus-environment:2.0.1")
+    implementation(libs.xodusOpenapi)
+    implementation(libs.xodusEntityStore)
+    implementation(libs.xodusEnvironment)
 
     // Kotlinx serialization for JSON
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.kotlinxSerializationJson)
 
     // MCP Kotlin SDK for Model Context Protocol
     implementation(libs.mcp)
