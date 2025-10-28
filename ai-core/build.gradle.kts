@@ -12,10 +12,10 @@ repositories {
 
 dependencies {
     // LangChain4j for LLM integration
-    implementation("dev.langchain4j:langchain4j:1.7.1")
-    implementation("dev.langchain4j:langchain4j-open-ai:1.7.1")
-    implementation("dev.langchain4j:langchain4j-anthropic:1.7.1")
-    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.7.1")
+    implementation("dev.langchain4j:langchain4j:1.8.0")
+    implementation("dev.langchain4j:langchain4j-open-ai:1.8.0")
+    implementation("dev.langchain4j:langchain4j-anthropic:1.8.0")
+    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.8.0")
 
     // Token counting with jtokkit (optional, for accurate token counting)
     compileOnly("com.knuddels:jtokkit:1.1.0")
