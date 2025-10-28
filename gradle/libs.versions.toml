@@ -10,7 +10,7 @@ kotlin = "2.2.21"
 kover = "0.9.3"
 qodana = "2025.2.1"
 
-hamcrest = "2.2"
+hamcrest = "3.0"
 # Has to be in sync with IntelliJ Platform
 composeuitest = "1.8.0-alpha04"
 jewelstandalone = "0.31.0-252.27409"
